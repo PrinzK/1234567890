@@ -1,4 +1,4 @@
-from pi2go_library import pi2go
+import pi2go
 import time
 import threading
 
