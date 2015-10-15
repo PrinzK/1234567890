@@ -1,19 +1,22 @@
+#!/usr/bin/python
+
 import socket, sys
+
 
 def send_broadcast_message(port, message):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	sock.bind(('', port))
+	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 	try:
-		sock.sendto(message, ('<broadcast>', port))
+		sock.sendto(message, ('192.168.178.255', port))
 		string = "message: \'" + message + "\' sent"
 		return string
-	except socket.timeout:
+	except socket.error:
 		return "Error while sending!"
 	finally:
 		sock.close()
 
-def send_unicast_message(address, port, message):
+def send_udp_unicast_message(address, port, message):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	try:
 		sock.sendto(message, (address, port))

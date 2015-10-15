@@ -28,7 +28,10 @@ try:
 				pi2go.setAllLEDs(0,0,4095)
 			else:
 				print "unknown state!"
-			communication.send_broadcast_message(38234, state)
+			print time.time()
+			for x in range(0,10):
+				communication.send_broadcast_message(38234, state)
+			print time.time()
 		print state
 		prev_state = state
 except KeyboardInterrupt:
