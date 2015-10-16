@@ -1,11 +1,12 @@
 import pi2go, time
 import communication
+import socket
 
 # ROUTER "192.168.178.1"
 UDP_IP = ""
 UDP_PORT = 38234
 
-sock = communication.init_receiver("", UDP_PORT)
+sock = communication.init_nonblocking_receiver(UDP_IP, UDP_PORT)
 
 LEDon = 4095
 LEDoff = 0
@@ -21,24 +22,22 @@ prev_state = 'STOPP'
  
 try:
     while True:
-        data = communication.receive_message(sock)
+		state = communication.receive_message(sock)
+		#print "received message: " +  state + " at: %f" %time.time()
         #print "time: %f", %time.time() 
-        #print "received message:" +  data + "at: %f", %time.time()
-        print data + "%f" %time.time()
+		#print data + "%f" %time.time()
         #print "address:", address
-        state = data       
+        
         # set LEDs
-        if state != prev_state:
-            if 'RUN' in state:
-                pi2go.setAllLEDs(LEDoff, LEDon, LEDoff)      
-            elif 'WARN' in state:
-                pi2go.setAllLEDs(LEDon, LEDon, LEDoff)
-            elif 'STOP' in state:
-                pi2go.setAllLEDs(LEDon, LEDoff, LEDoff)
-        prev_state = state
-#except socket.error as e:
-#	print "Socket error: "+ e
-
+		if state != prev_state:
+			print state
+			if 'RUN' in state:
+				pi2go.setAllLEDs(LEDoff, LEDon, LEDoff)      
+			elif 'WARN' in state:
+				pi2go.setAllLEDs(LEDon, LEDon, LEDoff)
+			elif 'STOP' in state:
+				pi2go.setAllLEDs(LEDon, LEDoff, LEDoff)
+		prev_state = state
 except KeyboardInterrupt:
     print 'KEYBOARD_STOPP'
 

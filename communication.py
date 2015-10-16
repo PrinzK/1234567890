@@ -45,8 +45,9 @@ def receive_message(sock):
 	data = ""
 	try:
 		data, addr = sock.recvfrom(1024)
+		#print "received message: " +  data + " at: %f" %time.time()
 	except socket.error as e:
-		print e
+		#print e
 		pass
 	finally:
 		return data

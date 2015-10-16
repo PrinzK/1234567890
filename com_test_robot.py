@@ -28,6 +28,7 @@ try:
         
         # set LEDs
         if state != prev_state:
+			print state
             if state == 'RUN':
                 pi2go.setAllLEDs(LEDoff, LEDon, LEDoff)      
             elif state == 'WARN':
