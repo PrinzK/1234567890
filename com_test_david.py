@@ -15,7 +15,7 @@ pi2go.init()
 pi2go.setAllLEDs(LEDoff, LEDoff, LEDoff)
 
 state = 'RUN'
-prev_state = 'STOPP'
+prev_state = 'STOP'
 # state = 'RUN'  robot detect no obstacles
 # state = 'STOP' robot detect an obstacles
 # state = 'WARN' robot get message
@@ -25,8 +25,6 @@ try:
 		state = communication.receive_message(sock)
 		#print "received message: " +  state + " at: %f" %time.time()
         #print "time: %f", %time.time() 
-		#print data + "%f" %time.time()
-        #print "address:", address
         
         # set LEDs
 		if state != prev_state:
