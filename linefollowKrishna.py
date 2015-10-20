@@ -2,6 +2,8 @@ import pi2go
 import time
 import communication
 
+LEDS_ON = 4095
+
 def send_distance():
 	while True:
 		distance = (int(pi2go.getDistance()*10))/10.0
@@ -48,15 +50,15 @@ def line_follower():
         elif right and not left:         # If the right sensor is off --> move left
             STATE = 01
         else:
-            STATE = 11
+	    STATE = 11
         
         try:    
             received_distance, addr = communication.receive_message(distance_socket)
             if received_distance != "":
                 dist = received_distance
         except:
-		    print "Houston experienced a problem"
-		"""
+	    print "Houston experienced a problem"
+	"""
         if time.time() - start > 0.15:
             dist = (int(pi2go.getDistance()*10))/10.0
             print dist
@@ -75,7 +77,16 @@ def line_follower():
         elif stop == False:
 		    pi2go.setAllLEDs(0,4095,0)
         """
-		if DIST_STATE = 
+	if DIST_STATE == prev_DIST_STATE:
+	    pass
+	elif DIST_STATE == 00:
+	    pi2go.setAllLEDs(0, LEDS_ON, 0)
+	elif DIST_STATE == 01:
+	    pi2go.setAllLEDs(LEDS_ON, LEDS_ON, 0)
+	elif DIST_STATE == 11:
+	    pi2go.setAllLEDs(LEDS_ON, 0, 0)
+	    STATE = 11
+        
         
         if STATE == prev_STATE:
             pass
