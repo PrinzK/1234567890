@@ -2,8 +2,8 @@ import pi2go, time
 import communication
 #from __future__ import print_function
 
-DIST_RUN = 40
-DIST_STOP = 15
+DIST_RUN = 25
+DIST_STOP = 10
 LEDon = 1024
 LEDoff = 0
 TIME_BETWEEN_MEASUREMENT = 0.2

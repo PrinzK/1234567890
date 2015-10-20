@@ -21,7 +21,7 @@ def send_udp_unicast_message(address, port, message):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	try:
 		sock.sendto(message, (address, port))
-		return "Sent: " + message + " to " + address + " on port " + port
+		return "Sent: " + str(message) + " to " + str(address) + " on port " + str(port)
 	except socket.error as e:
 		return "Error while sending : ",e
 	finally:
