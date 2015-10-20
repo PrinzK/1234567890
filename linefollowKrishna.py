@@ -1,15 +1,20 @@
 import pi2go
 import time
 import communication
+import multiprocessing
+from socket import error
 
 LEDS_ON = 4095
 
 def send_distance():
+    try:
 	while True:
 		distance = (int(pi2go.getDistance()*10))/10.0
 		communication.send_udp_unicast_message("127.0.0.1", 38235, str(distance))
 		print "Sent distance: " + str(distance) + " at: %f " %time.time()
 		time.sleep(0.1)
+    except KeyboardInterrupt:
+	pass
 
 def line_follower():
     """
@@ -36,7 +41,9 @@ def line_follower():
     prev_STATE = 11
     DIST_STATE = 00
     prev_DIST_STATE = 11
-    prev_stop = True
+    
+    distance_socket = communication.init_nonblocking_receiver("127.0.0.1", 38235)
+    
     while True:
         #print "line follower %f" %time.time()
         # print 'get dist: %f' % time.time()
@@ -56,27 +63,18 @@ def line_follower():
             received_distance, addr = communication.receive_message(distance_socket)
             if received_distance != "":
                 dist = received_distance
-        except:
-	    print "Houston experienced a problem"
-	"""
-        if time.time() - start > 0.15:
-            dist = (int(pi2go.getDistance()*10))/10.0
-            print dist
-            while dist < 25:
-                dist = (int(pi2go.getDistance()*10))/10.0
-                pi2go.stop()
-                STATE = 69
-                time.sleep(0.15)
-                if stop == False:
-                    pi2go.setAllLEDs(4095,0,0)
-                stop = True
-            start = time.time()
-        stop = False
-        if stop == prev_stop:
-            pass
-        elif stop == False:
-		    pi2go.setAllLEDs(0,4095,0)
-        """
+		print " - Received distance: " + str(dist) + " at: %f " %time.time()
+		if dist < 10:
+		    print "SO CLOSE!"
+		    DIST_STATE = 11
+		elif dist > 40:
+		    DIST_STATE = 00
+		else:
+		    DIST_STATE = 01
+		    
+        except error as e:
+	    print "Houston experienced a problem: " + e
+
 	if DIST_STATE == prev_DIST_STATE:
 	    pass
 	elif DIST_STATE == 00:
@@ -86,7 +84,7 @@ def line_follower():
 	elif DIST_STATE == 11:
 	    pi2go.setAllLEDs(LEDS_ON, 0, 0)
 	    STATE = 11
-        
+        prev_DIST_STATE = DIST_STATE
         
         if STATE == prev_STATE:
             pass
@@ -98,7 +96,6 @@ def line_follower():
             pi2go.turnForward(speed - change, speed + change)
         elif STATE == 11:
             pi2go.stop()
-        prev_stop = stop
         prev_STATE = STATE
 
 if __name__ == "__main__":
@@ -106,14 +103,15 @@ if __name__ == "__main__":
     pi2go.cleanup()
     pi2go.init()
     distance_process = multiprocessing.Process(name='send_distance', target=send_distance)
-	distance_process.daemon = True
-	distance_process.start()
-	distance_socket = communication.init_nonblocking_receiver("127.0.0.1", 38235)
+    distance_process.daemon = True
+    distance_process.start()
+    
 
     try:
         line_follower()
     except KeyboardInterrupt:
         print 'end'
+	distance_process.join(0.2)
     
     finally:
         pi2go.cleanup()
