@@ -1,7 +1,13 @@
 import pi2go
 import time
-import threading
-hallihallo
+import communication
+
+def send_distance():
+	while True:
+		distance = (int(pi2go.getDistance()*10))/10.0
+		communication.send_udp_unicast_message("127.0.0.1", 38235, str(distance))
+		print "Sent distance: " + str(distance) + " at: %f " %time.time()
+		time.sleep(0.1)
 
 def line_follower():
     """
@@ -26,8 +32,8 @@ def line_follower():
 
     STATE = 00
     prev_STATE = 11
-    STOP = False
-    stop = False
+    DIST_STATE = 00
+    prev_DIST_STATE = 11
     prev_stop = True
     while True:
         #print "line follower %f" %time.time()
@@ -43,7 +49,14 @@ def line_follower():
             STATE = 01
         else:
             STATE = 11
-
+        
+        try:    
+            received_distance, addr = communication.receive_message(distance_socket)
+            if received_distance != "":
+                dist = received_distance
+        except:
+		    print "Houston experienced a problem"
+		"""
         if time.time() - start > 0.15:
             dist = (int(pi2go.getDistance()*10))/10.0
             print dist
@@ -61,8 +74,8 @@ def line_follower():
             pass
         elif stop == False:
 		    pi2go.setAllLEDs(0,4095,0)
-        
-		
+        """
+		if DIST_STATE = 
         
         if STATE == prev_STATE:
             pass
@@ -81,6 +94,10 @@ if __name__ == "__main__":
     pi2go.init()
     pi2go.cleanup()
     pi2go.init()
+    distance_process = multiprocessing.Process(name='send_distance', target=send_distance)
+	distance_process.daemon = True
+	distance_process.start()
+	distance_socket = communication.init_nonblocking_receiver("127.0.0.1", 38235)
 
     try:
         line_follower()
