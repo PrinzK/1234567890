@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import socket, sys
+import commands
 
 
 def send_broadcast_message(port, message):
@@ -43,6 +44,7 @@ def init_blocking_receiver(address, port, timeout):
 	
 def receive_message(sock):
 	data = ""
+	addr = ""
 	try:
 		data, addr = sock.recvfrom(1024)
 		#print "received message: " +  data + " at: %f" %time.time()
@@ -50,4 +52,10 @@ def receive_message(sock):
 		#print e
 		pass
 	finally:
-		return data
+		return (data, addr)
+		
+def get_id():
+	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][17:]
+
+def get_ip():
+	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][5:]

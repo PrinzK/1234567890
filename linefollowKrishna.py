@@ -27,6 +27,8 @@ def line_follower():
     STATE = 00
     prev_STATE = 11
     STOP = False
+    stop = False
+    prev_stop = True
     while True:
         #print "line follower %f" %time.time()
         # print 'get dist: %f' % time.time()
@@ -50,8 +52,18 @@ def line_follower():
                 pi2go.stop()
                 STATE = 69
                 time.sleep(0.15)
+                if stop == False:
+                    pi2go.setAllLEDs(4095,0,0)
+                stop = True
             start = time.time()
-
+        stop = False
+        if stop == prev_stop:
+            pass
+        elif stop == False:
+		    pi2go.setAllLEDs(0,4095,0)
+        
+		
+        
         if STATE == prev_STATE:
             pass
         elif STATE == 00:
@@ -62,7 +74,7 @@ def line_follower():
             pi2go.turnForward(speed - change, speed + change)
         elif STATE == 11:
             pi2go.stop()
-
+        prev_stop = stop
         prev_STATE = STATE
 
 if __name__ == "__main__":
