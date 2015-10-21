@@ -5,6 +5,8 @@ import multiprocessing
 from socket import error
 
 LEDS_ON = 4095
+STATE_RUN = 1
+STATE_STOP = 0
 
 def send_distance():
     try:
@@ -34,13 +36,13 @@ def line_follower():
     """
     dist = 0
     speed = 70
-    change = 20
+    change = 30
     start = 0
 
     STATE = 00
     prev_STATE = 11
-    DIST_STATE = 00
-    prev_DIST_STATE = 11
+    DIST_STATE = STATE_RUN
+    prev_DIST_STATE = STATE_STOP
     
     distance_socket = communication.init_nonblocking_receiver("127.0.0.1", 38235)
     
@@ -62,41 +64,41 @@ def line_follower():
         try:    
             received_distance, addr = communication.receive_message(distance_socket)
             if received_distance != "":
-                dist = received_distance
+                dist = float(received_distance)
 		print " - Received distance: " + str(dist) + " at: %f " %time.time()
-		if dist < 10:
-		    print "SO CLOSE!"
-		    DIST_STATE = 11
-		elif dist > 40:
-		    DIST_STATE = 00
+		if dist < min_dist:
+		    DIST_STATE = STATE_STOP
+		#elif dist > run_dist:
+		#    DIST_STATE = 00
 		else:
-		    DIST_STATE = 01
-		    
+		    DIST_STATE = STATE_RUN
+		print "DIST_STATE: " + str(DIST_STATE)
+		print "STATE: " + str(STATE)
+		
         except error as e:
 	    print "Houston experienced a problem: " + e
 
-	if DIST_STATE == prev_DIST_STATE:
-	    pass
-	elif DIST_STATE == 00:
-	    pi2go.setAllLEDs(0, LEDS_ON, 0)
-	elif DIST_STATE == 01:
-	    pi2go.setAllLEDs(LEDS_ON, LEDS_ON, 0)
-	elif DIST_STATE == 11:
+	
+	if DIST_STATE == STATE_STOP:
+	    pi2go.stop()
+	    min_dist = 25
 	    pi2go.setAllLEDs(LEDS_ON, 0, 0)
-	    STATE = 11
-        prev_DIST_STATE = DIST_STATE
-        
-        if STATE == prev_STATE:
-            pass
-        elif STATE == 00:
-            pi2go.forward(speed)
-        elif STATE == 10:
-            pi2go.turnForward(speed + change, speed - change)
-        elif STATE == 01:
-            pi2go.turnForward(speed - change, speed + change)
-        elif STATE == 11:
-            pi2go.stop()
-        prev_STATE = STATE
+	else:
+	    pi2go.setAllLEDs(0, LEDS_ON, 0)
+	    min_dist = 10
+	    if STATE == prev_STATE:
+		pass
+	    elif STATE == 00:
+		pi2go.forward(speed)
+	    elif STATE == 10:
+		pi2go.turnForward(speed + change, speed - change)
+	    elif STATE == 01:
+		pi2go.turnForward(speed - change, speed + change)
+	    elif STATE == 11:
+		pi2go.stop()
+	    print "Least I should have stopped..."
+	    prev_STATE = STATE
+	prev_DIST_STATE = DIST_STATE
 
 if __name__ == "__main__":
     pi2go.init()
