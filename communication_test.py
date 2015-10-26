@@ -4,10 +4,12 @@ import time
 
 def test_receiver(address, port):
 	sock = init_nonblocking_receiver(address, port)
-	print 'Trying to receive messages from ' + address + ' on port ' + port + '...' 
+	print 'Trying to receive messages from ' + address + ' on port ' + str(port) + '...' 
 	try:
 		while True:
-			print receive_message(sock)
+                  message, addr = receive_message(sock)
+                  if message != '':
+                      print 'Received :' + message + ' from: ' + str(addr)
 	except KeyboardInterrupt:
 		print 'Stopped sending messages'
 	
@@ -16,10 +18,11 @@ def test_localhost_receiver():
 	test_receiver('127.0.0.1', 38234)
 
 def test_sender(address, port):
-	print 'Sending messages to ' + address + ' on port ' + port + '...' 
+	print 'Sending messages to ' + address + ' on port ' + str(port) + '...' 
 	try:
 		while True:
-			send_unicast_message(address, port)
+                  message = raw_input("Type message: ")
+                  send_udp_unicast_message(address, port, message)
 	except KeyboardInterrupt:
 		print 'Stopping sending messages'
 		
@@ -35,3 +38,11 @@ def test_broadcast_sender(port):
 						
 	except KeyboardInterrupt:
 		print 'Stopped sending messages'
+  
+def test_cut_addr_to_id():
+    try:
+        while True:
+            addr = raw_input("Type address with port in form [xx]x.[xx]x.[xx]x.[xx]x:xxxx")
+            print str(cut_addr_to_id(addr))
+    except KeyboardInterrupt:
+        print "KeyboardInterrupt"

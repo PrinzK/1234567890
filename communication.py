@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import socket, sys
+import socket
 import commands
 
 
@@ -53,6 +53,21 @@ def receive_message(sock):
 		pass
 	finally:
 		return (data, addr)
+  
+def receive_message_list(sock, state_list):
+    data = [], addr = []
+    data[0], addr[0] = receive_message(sock)
+    cur_data = data[0]
+    cur_addr = addr[0]
+    while cur_data != '':        
+        data.append(cur_data)
+        addr.append(cur_addr)
+        curr_data, cur_addr = receive_message(sock)
+    return state_list    
+    
+def cut_addr_to_id(addr):
+    id = addr.split()[0][len(addr)-7:len(addr)-4]
+    return id
 		
 def get_id():
 	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][17:]

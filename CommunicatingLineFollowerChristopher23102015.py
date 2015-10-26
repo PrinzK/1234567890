@@ -10,6 +10,7 @@ area = 10
 prev_dist = 0
 OWN_IP = communication.get_ip()
 message = ''
+started = False
 
 # Parameters
 speed = 50
@@ -30,18 +31,28 @@ try:
             #pi2go.cleanup()
             pi2go.init()
             sock = communication.init_nonblocking_receiver('',PORT)
-            STATE = 'RECEIVE'
+            
+        elif STATE == 'IDLE':
+            data, addr = communication.receive_message(sock)
+            
+            if data == 'GO':
+                STATE == 'RECEIVE'   
+            else:
+                
 
-
+                
+			    if data == 'STOP':
+			        started = False
+			        
         elif STATE == 'RECEIVE':
             prev_STATE = STATE
-            data, addr = communication.receive_message(sock)
+            data, addr = communication.receive_message_list(sock)
             
             if OWN_IP in addr:
                 data = ''
-            if data != '':
+            if data[0] != '':
                 print data
-            
+                
             if data == 'PROBLEM':
                 STATE = 'MODE'
             else:
