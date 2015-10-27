@@ -54,23 +54,30 @@ def receive_message(sock):
 	finally:
 		return (data, addr)
   
-def receive_message_list(sock, state_list):
-    data = [], addr = []
-    data[0], addr[0] = receive_message(sock)
-    cur_data = data[0]
-    cur_addr = addr[0]
+def receive_message_list(sock):
+    message_list = []
+    cur_data, cur_addr = receive_message(sock)
     while cur_data != '':        
-        data.append(cur_data)
-        addr.append(cur_addr)
-        curr_data, cur_addr = receive_message(sock)
-    return state_list    
-    
-def cut_addr_to_id(addr):
-    id = addr.split()[0][len(addr)-7:len(addr)-4]
-    return id
+        message_list.append((cur_data, cut_addr_to_id(cur_addr)))
+        cur_data, cur_addr = receive_message(sock)
+    return message_list 
+"""    
+def premodify_message_list(message_list):
+    for i in message_list:
+        i = ()
+    return message_list
+"""    
+def cut_addr_to_id((addr, port)):
+    ID = addr.split()[0][len(addr)-2:len(addr)-0]
+    return ID
 		
 def get_id():
 	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][17:]
 
 def get_ip():
 	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][5:]
+ 
+def update_state_list(state_list, message_list):
+    for message, ID in message_list:
+        state_list[int(ID)] = message
+    return state_list
