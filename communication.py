@@ -2,6 +2,7 @@
 
 import socket
 import commands
+import time
 
 
 def send_broadcast_message(port, message):
@@ -16,6 +17,11 @@ def send_broadcast_message(port, message):
 		return "Error while sending!"
 	finally:
 		sock.close()
+  
+def send_x_broadcast_messages(port, message, x):
+    for i in range(0, x):
+        send_broadcast_message(port, message)
+        time.sleep(0.00001)
 
 def send_udp_unicast_message(address, port, message):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -26,6 +32,11 @@ def send_udp_unicast_message(address, port, message):
 		return "Error while sending : ",e
 	finally:
 		sock.close()
+  
+def send_x_udp_unicast_messages(address, port, message, x):
+    for i in range(0, x):
+        send_udp_unicast_message(port, message)
+        time.sleep(0.00001)
 
 def init_receiver(address, port):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -75,7 +86,7 @@ def get_id():
 	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][17:]
 
 def get_ip():
-	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][5:]
+	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][6:]
  
 def update_state_list(state_list, message_list):
     for message, ID in message_list:
