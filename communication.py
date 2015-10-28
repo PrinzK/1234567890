@@ -69,15 +69,23 @@ def premodify_message_list(message_list):
 """    
 def cut_addr_to_id((addr, port)):
     ID = addr.split()[0][len(addr)-2:len(addr)-0]
-    return ID
+    return int(ID)
 		
 def get_id():
-	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][17:]
+	return int(commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][18:])
 
 def get_ip():
 	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][5:]
  
-def update_state_list(state_list, message_list):
+def update_state_list(state_list, message_list, OWN_ID):
     for message, ID in message_list:
-        state_list[int(ID)] = message
+        if ID == OWN_ID:
+            continue
+        print message
+        if message == "STOP":
+            message = False
+        elif message == "RUN" or message == "SLOW":
+            message = True
+        
+        state_list[ID] = message
     return state_list

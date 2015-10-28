@@ -106,7 +106,7 @@ try:
             right = pi2go.irRightLine() 
             # area = 11/10/00/01/11 == -2/-1/0/1/2       
             if left and right and (prev_area < 0):
-                area = -2
+                area = 0 #changed: -2
             elif left and not right:
                 area = -1
             elif not left and not right:
@@ -114,10 +114,11 @@ try:
             elif not left and right:
                 area = 1
             elif left and right and (prev_area > 0):
-                area = 2
+                area = 0 #changed: ss2
             else:
-                print 'lost Line'
-                break           
+                #print 'lost Line'
+                #break           
+                area = 0
             STATE = 'MOTOR'
 
         
