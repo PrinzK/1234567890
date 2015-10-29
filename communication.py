@@ -64,12 +64,12 @@ def receive_message_list(sock):
 	message_list = []
 	cur_data, cur_addr = receive_message(sock)
 	while cur_data != '':
-		message_list.append((cur_data, cut_addr_to_id(cur_addr)))
+		message_list.append((cur_data, read_id_from_addr(cur_addr)))
 		cur_data, cur_addr = receive_message(sock)
 	return message_list
 
 
-def cut_addr_to_id((ip_addr, port)):
+def read_id_from_addr(addr):
 	IP = addr[0]
  	ID = int(IP[-3:])
 	return ID
