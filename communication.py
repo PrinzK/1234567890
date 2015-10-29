@@ -70,8 +70,9 @@ def receive_message_list(sock):
 
 
 def cut_addr_to_id((addr, port)):
-	ID = addr.split()[0][len(addr)-2:len(addr)-0]
-	return int(ID)
+	IP = addr[0]
+ 	ID = int(IP[-3:])
+	return ID
 		
 
 def get_id():
