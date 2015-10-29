@@ -69,7 +69,7 @@ def receive_message_list(sock):
 	return message_list
 
 
-def cut_addr_to_id((addr, port)):
+def cut_addr_to_id((ip_addr, port)):
 	IP = addr[0]
  	ID = int(IP[-3:])
 	return ID
