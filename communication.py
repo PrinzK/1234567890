@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
 import socket
-import commands
+
+import subprocess
 
 
 def send_broadcast_message(port, message):
@@ -64,22 +65,27 @@ def receive_message_list(sock):
 	message_list = []
 	cur_data, cur_addr = receive_message(sock)
 	while cur_data != '':
-		message_list.append((cur_data, read_id_from_addr(cur_addr)))
+		message_list.append((cur_data, get_id_from_addr(cur_addr)))
 		cur_data, cur_addr = receive_message(sock)
 	return message_list
 
 
-def read_id_from_addr(addr):
-	IP = addr[0]
- 	ID = int(IP[-3:])
-	return ID
-		
+def get_ip():
+	IP = subprocess.check_output(['hostname', '-I'])
+ 	IP = IP[:-2]
+	return IP
+
 
 def get_id():
-	return int(commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][18:])
+	IP = get_ip()
+  	x = ".".join(IP.split('.')[0:-1]) + '.'
+   	ID = int(IP.replace(x,''))
+  	#ID = int(IP[-3:])
+	return ID
 
 
-def get_ip():
-	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][5:]
-
-
+def get_id_from_addr(addr):
+	IP = addr[0]
+  	x = ".".join(IP.split('.')[0:-1]) + '.'
+   	ID = int(IP.replace(x,''))
+	return ID
