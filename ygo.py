@@ -45,7 +45,7 @@ try:
             # print OWN_ID, " : ", message, " from ", ID
             if msg == "False":
                 msg = False
-            elif message == "True" or message == "SLOW":
+            elif msg == "True" or msg == "SLOW":
                 msg = True
             state_list[ID] = msg
         # return state_list
