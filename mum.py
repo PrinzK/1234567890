@@ -13,19 +13,25 @@ try:
     communication.close_socket(sock)
     while True:
         if "GO_COMM" in message:
-            print "I'm in comm_mode now!"            
+            status = "I'm in comm_mode now!"            
+            communication.send_broadcast_message(5003, status) 
             message = comm_bot_test.start()            
-            print "Exiting comm_mode"
+            status = "Exiting comm_mode"
+            communication.send_broadcast_message(5003, status)
         elif "GO_AUTO" in message:
-            print "I'm in auto_mode now!"
+            status ="I'm in auto_mode now!"
+            communication.send_broadcast_message(5003, status)
             message = auto_bot_test.start()
-            print "Exiting auto_mode"
+            status = "Exiting auto_mode"
+            communication.send_broadcast_message(5003, status)
         elif "GO_IDLE" in message:
-            print "I'm in idle_mode now!"
+            status = "I'm in idle_mode now!"
+            communication.send_broadcast_message(5003, status)
             sock = communication.init_receiver('', PORT)
             message, addr = communication.receive_message(sock)
             communication.close_socket(sock)
-            print "Exiting idle_mode"
+            status = "Exiting idle_mode"
+            communication.send_broadcast_message(5003, status)
         else:
             print "Error! Going in idle_mode..."
             message = "GO_IDLE"
