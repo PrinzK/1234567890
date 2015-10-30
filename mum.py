@@ -1,22 +1,36 @@
 import communication
-#import comm_bot
-#import auto_bot
+import comm_bot_test
+import auto_bot_test
 
-PORT = 5004
+PORT = 5003
 
-sock = communication.init_blocking_receiver('', PORT, 1)
+sock = communication.init_receiver('', PORT)
 
 print "Hey there!"
 
 try:
+    message, addr = communication.receive_message(sock)
+    communication.close_socket(sock)
     while True:
-        message, addr = communication.receive_message(sock)
         if "GO_COMM" in message:
-            #message = bot_comm.start()
             print "I'm in comm_mode now!"            
+            message = comm_bot_test.start()            
+            print "Exiting comm_mode"
         elif "GO_AUTO" in message:
-            #message = bot_auto.start()
             print "I'm in auto_mode now!"
+            message = auto_bot_test.start()
+            print "Exiting auto_mode"
+        elif "GO_IDLE" in message:
+            print "I'm in idle_mode now!"
+            sock = communication.init_receiver('', PORT)
+            message, addr = communication.receive_message(sock)
+            communication.close_socket(sock)
+            print "Exiting idle_mode"
+        else:
+            print "Error! Going in idle_mode..."
+            message = "GO_IDLE"
+        
+        
 except KeyboardInterrupt:
-    print "Exiting mum.py \n Talk to me with ssh!"
+    print "Exiting mum.py \nTalk to me with ssh now!"
         
