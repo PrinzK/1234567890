@@ -3,6 +3,17 @@ import communication
 import pi2go
 import time
 
+# Constants
+NUMBER_OF_COMM_BOTS = 5
+COMM = True
+AUTO = False
+SERVER_ADDRESS = '192.168.178.99'
+BC_IP = '192.168.178.255'
+PORT = 5005
+MODE_PORT= 5006 
+LEDoff = 0
+LEDon = 1000
+
 # Initail Values
 STATE = 'INIT'
 mode = ''
@@ -15,11 +26,13 @@ message = ''
 speed = 50
 change = 10 
 #change = 17.5
-BC_IP = '192.168.178.255'
-PORT = 5005
-LEDoff = 0
-LEDon = 1000
 
+
+# set own program type: comm or auto
+if communication.get_id() <= 100 + NUMBER_OF_COMM_BOTS:
+    OWN_MODE = COMM
+else:
+    OWN_MODE = AUTO
 
 # Programm
 try:
@@ -30,8 +43,16 @@ try:
             #pi2go.cleanup()
             pi2go.init()
             sock = communication.init_nonblocking_receiver('',PORT)
-            STATE = 'RECEIVE'
-
+            STATE = 'IDLE'
+            
+        elif STATE == 'IDLE':
+            data, addr = communication.receive_message(sock)
+            if data == 'START':
+                STATE = 'RECEIVE'
+            elif OWN_MODE == COMM and data == 'STARTCOMM':
+                STATE = 'RECEIVE'
+            elif OWN_MODE == AUTO and data == 'STARTAUTO':
+                STATE = 'OBSTACLE'
 
         elif STATE == 'RECEIVE':
             prev_STATE = STATE
@@ -41,8 +62,9 @@ try:
                 data = ''
             if data != '':
                 print data
-            
-            if data == 'PROBLEM':
+            if data == 'GOIDLE':
+                STATE = 'IDLE'
+            elif data == 'PROBLEM':
                 STATE = 'MODE'
             else:
                 STATE = 'OBSTACLE'
@@ -51,7 +73,9 @@ try:
         elif STATE == 'OBSTACLE':
             prev_STATE = STATE            
             cur_dist = time.time()            
+            STATE = 'MODE'                      # I know that's ugly.
             if cur_dist - prev_dist > 0.2:
+                STATE = 'SEND_STATUS'
                 prev_dist = cur_dist                
                 dist = pi2go.getDistance()
                 print dist
@@ -64,8 +88,12 @@ try:
             else:
                 # Distance okay
                 danger = False
-            STATE = 'MODE'        
-
+                
+        # bad prototype: when the US sensor delays the program, this one delays even more. no too much, actually.
+        elif STATE == 'SEND_STATUS':
+            prev_STATE = STATE
+            communication.send_x_udp_unicast_messages(SERVER_ADDRESS, MODE_PORT, mode, 5) #even worse: the mode is updated in the next state...
+            STATE = 'MODE' 
 
         elif STATE == 'MODE':
             prev_STATE = STATE            

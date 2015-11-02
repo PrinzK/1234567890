@@ -1,8 +1,13 @@
 #!/usr/bin/python
 
 import socket
+<<<<<<< HEAD
 
 import subprocess
+=======
+import commands
+import time
+>>>>>>> Control
 
 
 def send_broadcast_message(port, message):
@@ -17,6 +22,11 @@ def send_broadcast_message(port, message):
 		return "Error while sending!"
 	finally:
 		sock.close()
+  
+def send_x_broadcast_messages(port, message, x):
+    for i in range(0, x):
+        send_broadcast_message(port, message)
+        time.sleep(0.00001)
 
 
 def send_udp_unicast_message(address, port, message):
@@ -28,6 +38,11 @@ def send_udp_unicast_message(address, port, message):
 		return "Error while sending : ",e
 	finally:
 		sock.close()
+  
+def send_x_udp_unicast_messages(address, port, message, x):
+    for i in range(0, x):
+        send_udp_unicast_message(port, message)
+        time.sleep(0.00001)
 
 
 def init_receiver(address, port):
@@ -71,6 +86,7 @@ def receive_message_list(sock):
 
 
 def get_ip():
+<<<<<<< HEAD
 	IP = subprocess.check_output(['hostname', '-I'])
  	IP = IP[:-2]
 	return IP
@@ -89,6 +105,9 @@ def get_id_from_addr(addr):
   	x = ".".join(IP.split('.')[0:-1]) + '.'
    	ID = int(IP.replace(x,''))
 	return ID
+=======
+	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][6:]
+>>>>>>> Control
  
 def close_socket(sock):
      sock.close()
