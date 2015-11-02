@@ -89,3 +89,6 @@ def get_id_from_addr(addr):
   	x = ".".join(IP.split('.')[0:-1]) + '.'
    	ID = int(IP.replace(x,''))
 	return ID
+ 
+def close_socket(sock):
+     sock.close()
