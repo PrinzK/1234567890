@@ -1,0 +1,30 @@
+# system variables
+NUMBER_OF_ROBOTS = 10
+NUMBER_OF_AUTO_BOTS = 5
+NUMBER_OF_COMM_BOTS = NUMBER_OF_ROBOTS - NUMBER_OF_AUTO_BOTS
+
+# communication parameters
+COMMAND_PORT = 5005
+MODE_PORT= 5006 
+PORT = 5005 # TODO: change name
+SENDING_ATTEMPTS = 20
+BC_IP = '192.168.178.255'
+
+# protocol messages # TODO: define!
+GO_IDLE = "GO_IDLE"
+GO_AUTO = "GO_AUTO"
+GO_COMM = "GO_COMM"
+START_ALL = "START_ALL"
+
+# robots
+SPEED_RUN = 75
+SPEED_SLOW = 50
+SPEED_WARN = 25
+SPEED_STOP = 0
+LED_OFF = 0
+LED_ON = 1000
+PUSH = 5
+
+
+
+

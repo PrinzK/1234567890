@@ -1,8 +1,6 @@
 import communication
+from constants import *
 
-COMMAND_PORT = 5005
-MODE_PORT= 5006 
-SENDING_ATTEMPTS = 20
 
 sock = communication.init_nonblocking_receiver('', MODE_PORT)
 
@@ -16,12 +14,14 @@ def get_modes():
 		
 
 def start_comm_bots():
-    communication.send_x_broadcast_messages(COMMAND_PORT, "STARTCOMM", SENDING_ATTEMPTS)
+    communication.send_x_broadcast_messages(COMMAND_PORT, GO_COMM, SENDING_ATTEMPTS)
 def start_auto_bots():
-    communication.send_x_broadcast_messages(COMMAND_PORT, "STARTAUTO", SENDING_ATTEMPTS)
+    communication.send_x_broadcast_messages(COMMAND_PORT, GO_AUTO, SENDING_ATTEMPTS)
 def start_all_bots():
-    communication.send_x_broadcast_messages(COMMAND_PORT, "STARTALL", SENDING_ATTEMPTS)
+    communication.send_x_broadcast_messages(COMMAND_PORT, START_ALL, SENDING_ATTEMPTS)
 def stop_all_robots():
-    communication.send_x_broadcast_messages(COMMAND_PORT, "GOIDLE", SENDING_ATTEMPTS)
+    communication.send_x_broadcast_messages(COMMAND_PORT, GO_IDLE, SENDING_ATTEMPTS)
     
-get_modes()
+#get_modes()
+    
+def set_speed(robot = N, speed)
