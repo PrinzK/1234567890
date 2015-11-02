@@ -1,220 +1,166 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Oct 28 21:43:35 2015
+
+@author: christopher
+"""
+
 # Libraries
 import communication
 import pi2go
 import time
-
-# Constants
-NUMBER_OF_COMM_BOTS = 5
-COMM = True
-AUTO = False
-SERVER_ADDRESS = '192.168.178.99'
-BC_IP = '192.168.178.255'
-PORT = 5005
-MODE_PORT= 5006 
-LEDoff = 0
-LEDon = 1000
+from crashing_constants import *
 
 # Initail Values
 STATE = 'INIT'
-mode = ''
-area = 10
-prev_dist = 0
-OWN_IP = communication.get_ip()
-message = ''
+MODE = 'STOP'
+prev_MODE = 'STOP'
+DISTANCE = 0
+SQUAD = []
+prev_messurement_time = 0
+message_buffer_slave = []
+message_buffer_master = []
 
-# Parameters
-speed = 50
-change = 10 
-#change = 17.5
-
-
-# set own program type: comm or auto
-if communication.get_id() <= 100 + NUMBER_OF_COMM_BOTS:
-    OWN_MODE = COMM
-else:
-    OWN_MODE = AUTO
 
 # Programm
 try:
     while True:
-        #print STATE
+        
         if STATE == 'INIT':
-            prev_STATE = STATE
-            #pi2go.cleanup()
             pi2go.init()
             sock = communication.init_nonblocking_receiver('',PORT)
-            STATE = 'IDLE'
-            
-        elif STATE == 'IDLE':
-            data, addr = communication.receive_message(sock)
-            if data == 'START':
-                STATE = 'RECEIVE'
-            elif OWN_MODE == COMM and data == 'STARTCOMM':
-                STATE = 'RECEIVE'
-            elif OWN_MODE == AUTO and data == 'STARTAUTO':
-                STATE = 'OBSTACLE'
+            for x in range(SQUAD_SIZE):
+                SQUAD.append(True)
+                message_buffer_slave.append(True)
+            OWN_IP = communication.get_ip()
+            OWN_ID = communication.get_id_from_ip(OWN_IP)
+            print OWN_ID
+            STATE = 'RUNNING'
 
-        elif STATE == 'RECEIVE':
-            prev_STATE = STATE
-            data, addr = communication.receive_message(sock)
-            
-            if OWN_IP in addr:
-                data = ''
-            if data != '':
-                print data
-            if data == 'GOIDLE':
-                STATE = 'IDLE'
-            elif data == 'PROBLEM':
-                STATE = 'MODE'
-            else:
-                STATE = 'OBSTACLE'
 
-       
-        elif STATE == 'OBSTACLE':
-            prev_STATE = STATE            
-            cur_dist = time.time()            
-            STATE = 'MODE'                      # I know that's ugly.
-            if cur_dist - prev_dist > 0.2:
-                STATE = 'SEND_STATUS'
-                prev_dist = cur_dist                
-                dist = pi2go.getDistance()
-                print dist
+        elif STATE == 'RUNNING':
+            # Distance         
+            if time.time() - prev_messurement_time > WAIT_DIST:
+                prev_messurement_time = time.time()                
+                distance = pi2go.getDistance()
+            
             # Obstacle = 1, No Obstacle = 0
-            centre = pi2go.irCentre()
+            irCentre = pi2go.irCentre()
             
-            if centre or (dist < 20):
-                # Distance not okay
-                danger = True
+            # Obstacle Analysis
+            if irCentre or (distance < DIST_MIN):
+                distance_level = 0
+            elif distance > DIST_MAX:
+                distance_level = 2
             else:
-                # Distance okay
-                danger = False
+                distance_level = 1
                 
-        # bad prototype: when the US sensor delays the program, this one delays even more. no too much, actually.
-        elif STATE == 'SEND_STATUS':
-            prev_STATE = STATE
-            communication.send_x_udp_unicast_messages(SERVER_ADDRESS, MODE_PORT, mode, 5) #even worse: the mode is updated in the next state...
-            STATE = 'MODE' 
-
-        elif STATE == 'MODE':
-            prev_STATE = STATE            
-            prev_mode = mode
-                    
-            if danger:
-                mode = 'STOP'
-            if data == 'PROBLEM':        
-                mode = 'WARN'
-            elif prev_mode == 'WARN' and data == 'OKAY':
-                mode = 'RUN'
-            elif prev_mode == 'STOP' and not danger:
-                mode = 'RUN'
-            elif mode == '':
-                mode = 'RUN'
-            #print mode
-            #print danger
-            STATE = 'LED'
-
- 
-        elif STATE == 'LED':
-            prev_STATE = STATE
-            if mode != prev_mode:                          
-                if mode == 'RUN':
-                    pi2go.setAllLEDs(LEDoff, LEDon, LEDoff)      
-                elif mode == 'WARN':
-                    pi2go.setAllLEDs(LEDon, LEDon, LEDoff)
-                elif mode == 'STOP':
-                    pi2go.setAllLEDs(LEDon, LEDoff, LEDoff)                
-            STATE = 'LINE'
-
-       
-        elif STATE == 'LINE':
-            prev_STATE = STATE
-            prev_area = area 
-            # Logik: White = 1 / BLACK = 0  
-            left = pi2go.irLeftLine()
-            right = pi2go.irRightLine() 
-            # area = 11/10/00/01/11 == -2/-1/0/1/2       
-            if left and right and (prev_area < 0):
-                area = 0 #changed: -2
-            elif left and not right:
-                area = -1
-            elif not left and not right:
-                area = 0
-            elif not left and right:
-                area = 1
-            elif left and right and (prev_area > 0):
-                area = 0 #changed: ss2
-            else:
-                #print 'lost Line'
-                #break           
-                area = 0
-            STATE = 'MOTOR'
-
-        
-        elif STATE == 'MOTOR':
-            prev_STATE = STATE
-            
-            if mode == 'RUN':
-                if (prev_mode != 'RUN') or (area != prev_area):
-                    if area == 0:
-                        leftspeed = speed
-                        rightspeed = speed
-                    elif area == -1:
-                        leftspeed = speed + change
-                        rightspeed = speed - change
-                    elif area == 1:
-                        leftspeed = speed - change
-                        rightspeed = speed + change
+            # Receive
+            data = 'new_round'
+            while data != '':
+                data, addr = communication.receive_message(sock) 
+                if data != '':
+                    ID = communication.get_id_from_ip(addr[0])
+                    if ID == OWN_ID:
+                        print 'OWN: ' , ID, ' : ' , data
+                        continue
+                    if ID >= SQUAD_START and ID <= SQUAD_START+SQUAD_SIZE:
+                        print 'ROBOT: ', ID, ' : ' , data
+                        if data == 'PROBLEM':
+                            curr_STATUS = False
+                            SQUAD[ID-SQUAD_START] = curr_STATUS
+                        elif data == 'RELEASE':
+                            curr_STATUS = True
+                            SQUAD[ID-SQUAD_START] = curr_STATUS
                     else:
-                        leftspeed = 0
-                        rightspeed = 0
-                        
-                    if leftspeed < 0:
-                        leftspeed = 0
-                    elif leftspeed > 100:
-                        leftspeed = 100
+                        print 'MASTER:' , ID , ' : ' , data
+                        # make List with Master commands an react on this
+                        # change MODE, STATUS, SPEED, DISTANCELIMITS
                     
-                    if rightspeed < 0:
-                        rightspeed = 0
-                    elif rightspeed > 100:
-                        rightspeed = 100
+            # Analyse --> Calculate MODE
+            prev_MODE = MODE
+            if distance_level == 0:
+                MODE = 'STOP'
+            elif distance_level == 1 and all(SQUAD):
+                MODE = 'SLOW'
+            elif distance_level == 2 and all(SQUAD):
+                MODE = 'RUN'
+            elif distance_level != 0 and not all(SQUAD):
+                MODE = 'WARN'
+            else:
+                print 'check MODE-Conditions'
+                break
+            
+            # Set own SQUAD_VALUE  
+            if MODE != prev_MODE:                          
+                if MODE == 'STOP':
+                    SQUAD[OWN_ID-SQUAD_START] = False
+                else:
+                    SQUAD[OWN_ID-SQUAD_START] = True
+
+            # LEDs  
+            if MODE != prev_MODE:                          
+                if MODE == 'RUN':
+                    pi2go.setAllLEDs(LED_OFF,LED_ON,LED_OFF)
+                elif MODE == 'SLOW':
+                    pi2go.setAllLEDs(LED_OFF,LED_OFF,LED_ON)
+                elif MODE == 'WARN':
+                    pi2go.setAllLEDs(LED_ON,LED_ON,LED_OFF)
+                elif MODE == 'STOP':
+                    pi2go.setAllLEDs(LED_ON,LED_OFF,LED_OFF)
+                    
+            # Distance controller
+            if MODE == 'SLOW':
+                SPEED_SLOW = SPEED_RUN - (DIST_REF-DISTANCE) * KP
+                # Controlllimits
+                if SPEED_SLOW > SPEED_CONTROL_MAX:
+                    SPEED_SLOW = SPEED_CONTROL_MAX
+                elif SPEED_SLOW < SPEED_CONTROL_MIN:
+                    SPEED_SLOW = SPEED_CONTROL_MIN
+                print 'DIST: ', DISTANCE , 'SPEED: ', SPEED_SLOW
                         
-                    pi2go.turnForward(leftspeed, rightspeed)
             
-            else:
-                if mode != prev_mode: 
-                    pi2go.stop()
-            
-            if mode == 'STOP' or (mode == 'RUN' and prev_mode == 'STOP'):
-                STATE = 'SEND'
-            else:
-                STATE = 'RECEIVE'
-
-
-        elif STATE == 'SEND':
-            prev_STATE = STATE
-            if danger == True:
-                message = 'PROBLEM'
-                communication.send_broadcast_message(PORT, message)
-                time.sleep(0.00001)
-            elif danger == False:
-                message = 'OKAY'
-                for x in range(0,3):
-                    communication.send_broadcast_message(PORT, message)
-                    time.sleep(0.00001)
-            
-            STATE = 'RECEIVE'
- 
-           
+            # Motor
+            if MODE != prev_MODE:                          
+                if MODE == 'RUN':
+                    SPEED = SPEED_RUN
+                elif MODE == 'SLOW':
+                    SPEED = SPEED_SLOW
+                elif MODE == 'WARN':
+                    SPEED = SPEED_WARN
+                elif MODE == 'STOP':
+                    SPEED = SPEED_STOP 
+                # Speedlimits
+                if SPEED > 100:
+                    SPEED = 100
+                elif SPEED < 0:
+                    SPEED = 0
+                pi2go.go(SPEED,SPEED)
+                
+            # Send
+            if MODE != prev_MODE:                          
+                if prev_MODE == 'STOP':
+                    #print 'RELEASE'
+                    message = 'RELEASE'
+                    for x in range(SENDING_ATTEMPTS):
+                        communication.send_broadcast_message(PORT, message)
+                        time.sleep(WAIT_SEND)                    
+                elif MODE == 'STOP':
+                    #print 'PROBLEM'
+                    message = 'PROBLEM'
+                    for x in range(PUSH):
+                        communication.send_broadcast_message(PORT, message)
+                        time.sleep(WAIT_SEND)
+       
         else:
             print 'impossible STATE'
-            pi2go.stop()
-            break
+            STATE == 'RUNNING'
             
 except KeyboardInterrupt:
     print 'KEYBOARD'
 
 finally:
     pi2go.stop()
-    sock.close()
     pi2go.cleanup()
+    sock.close()
     print 'END'

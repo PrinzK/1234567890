@@ -9,7 +9,7 @@ Created on Wed Oct 28 21:43:35 2015
 import communication
 import pi2go
 import time
-from constants import *
+from crashing_constants import *
 
 # Initail Values
 STATE = 'INIT'
