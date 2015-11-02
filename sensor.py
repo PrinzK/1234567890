@@ -9,6 +9,7 @@ Created on Wed Oct 28 21:43:35 2015
 import communication
 import pi2go
 import time
+from crashing_constants import * 
 
 # Initail Values
 STATE = 'INIT'
@@ -21,25 +22,25 @@ message_buffer_slave = []
 message_buffer_master = []
 
 # Parameters
-SPEED_RUN = 75
-SPEED_SLOW = 50
-SPEED_WARN = 25
-SPEED_STOP = 0
-SPEED_CONTROL_MAX = 75
-SPEED_CONTROL_MIN = 50
-SQUAD_SIZE = 20
-SQUAD_START = 100
-DIST_MIN = 20
-DIST_MAX = 50
-DIST_REF = DIST_MAX
-WAIT_DIST = 0.2
-WAIT_SEND = 0.00001
-LED_OFF = 0
-LED_ON = 1000
-KP = 0.1
-PUSH = 5
-PORT = 5005
-BROADCAST_IP = '192.168.178.255'
+#SPEED_RUN = 75
+#SPEED_SLOW = 50
+#SPEED_WARN = 25
+#SPEED_STOP = 0
+#SPEED_CONTROL_MAX = 75
+#SPEED_CONTROL_MIN = 50
+#SQUAD_SIZE = 20
+#SQUAD_START = 100
+#DIST_MIN = 20
+#DIST_MAX = 50
+#DIST_REF = DIST_MAX
+#WAIT_DIST = 0.2
+#WAIT_SEND = 0.00001
+#LED_OFF = 0
+#LED_ON = 1000
+#KP = 0.1
+#PUSH = 5
+#PORT = 5005
+#BROADCAST_IP = '192.168.178.255'
 
 # Programm
 try:
@@ -52,20 +53,21 @@ try:
                 SQUAD.append(True)
                 message_buffer_slave.append(True)
             OWN_IP = communication.get_ip()
+            print OWN_IP
             OWN_ID = communication.get_id_from_ip(OWN_IP)
             print OWN_ID
             STATE = 'RUNNING'
-
+            print DIST_MIN
 
         elif STATE == 'RUNNING':
-            # Distance         
+            # Distance 
             if time.time() - prev_messurement_time > WAIT_DIST:
                 prev_messurement_time = time.time()                
                 distance = pi2go.getDistance()
             
             # Obstacle = 1, No Obstacle = 0
-            irCentre = pi2go.irCentre()
-            
+            #irCentre = pi2go.irCentre() # TODO: edit pi2go library and uncomment!
+            irCentre = False
             # Obstacle Analysis
             if irCentre or (distance < DIST_MIN):
                 distance_level = 0
@@ -73,7 +75,7 @@ try:
                 distance_level = 2
             else:
                 distance_level = 1
-                
+            #print distance_level                
 #            # Receive
 #            data = 'new_round'
 #            while data != '':
@@ -111,11 +113,11 @@ try:
                 break
             
             # Set own SQUAD_VALUE  
-            if MODE != prev_MODE:                          
-                if MODE == 'STOP':
-                    SQUAD[OWN_ID-SQUAD_START] = False
-                else:
-                    SQUAD[OWN_ID-SQUAD_START] = True
+#            if MODE != prev_MODE:                          
+#                if MODE == 'STOP':
+#                    SQUAD[OWN_ID-SQUAD_START] = False
+#                else:
+#                    SQUAD[OWN_ID-SQUAD_START] = True
 
             # LEDs  
             if MODE != prev_MODE:                          

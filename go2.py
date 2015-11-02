@@ -68,10 +68,12 @@ try:
                         print 'ROBOT: ', ID, ' : ' , data
                         if data == 'PROBLEM':
                             curr_STATUS = False
-                            SQUAD[ID-SQUAD_START] = curr_STATUS
+                            #SQUAD[ID-SQUAD_START] = curr_STATUS
+                            SQUAD[ID] = curr_STATUS
                         elif data == 'RELEASE':
                             curr_STATUS = True
-                            SQUAD[ID-SQUAD_START] = curr_STATUS
+                            #SQUAD[ID-SQUAD_START] = curr_STATUS
+                            SQUAD[ID] = curr_STATUS
                     else:
                         print 'MASTER:' , ID , ' : ' , data
                         # make List with Master commands an react on this
@@ -94,9 +96,11 @@ try:
             # Set own SQUAD_VALUE  
             if MODE != prev_MODE:                          
                 if MODE == 'STOP':
-                    SQUAD[OWN_ID-SQUAD_START] = False
+                    #SQUAD[OWN_ID-SQUAD_START] = False
+                    SQUAD[OWN_ID] = False
                 else:
-                    SQUAD[OWN_ID-SQUAD_START] = True
+                    #SQUAD[OWN_ID-SQUAD_START] = True
+                    SQUAD[OWN_ID] = True
 
             # LEDs  
             if MODE != prev_MODE:                          
