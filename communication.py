@@ -1,13 +1,7 @@
 #!/usr/bin/python
 
 import socket
-<<<<<<< HEAD
-
 import subprocess
-=======
-import commands
-import time
->>>>>>> Control
 
 
 def send_broadcast_message(port, message):
@@ -22,11 +16,6 @@ def send_broadcast_message(port, message):
 		return "Error while sending!"
 	finally:
 		sock.close()
-  
-def send_x_broadcast_messages(port, message, x):
-    for i in range(0, x):
-        send_broadcast_message(port, message)
-        time.sleep(0.00001)
 
 
 def send_udp_unicast_message(address, port, message):
@@ -38,11 +27,6 @@ def send_udp_unicast_message(address, port, message):
 		return "Error while sending : ",e
 	finally:
 		sock.close()
-  
-def send_x_udp_unicast_messages(address, port, message, x):
-    for i in range(0, x):
-        send_udp_unicast_message(port, message)
-        time.sleep(0.00001)
 
 
 def init_receiver(address, port):
@@ -80,34 +64,37 @@ def receive_message_list(sock):
 	message_list = []
 	cur_data, cur_addr = receive_message(sock)
 	while cur_data != '':
-		message_list.append((cur_data, get_id_from_addr(cur_addr)))
+		message_list.append((cur_data, get_id_from_ip(cur_addr)))
 		cur_data, cur_addr = receive_message(sock)
 	return message_list
 
 
 def get_ip():
-<<<<<<< HEAD
-	IP = subprocess.check_output(['hostname', '-I'])
- 	IP = IP[:-2]
-	return IP
+	ip = subprocess.check_output(['hostname', '-I'])
+ 	ip = ip[:-2]
+	return ip
+
+
+def get_id_from_ip(ip_addr):
+  	x = ".".join(ip_addr.split('.')[0:-1]) + '.'
+   	identifier = int(ip_addr.replace(x,''))
+	return identifier
 
 
 def get_id():
-	IP = get_ip()
-  	x = ".".join(IP.split('.')[0:-1]) + '.'
-   	ID = int(IP.replace(x,''))
-  	#ID = int(IP[-3:])
-	return ID
-
-
-def get_id_from_addr(addr):
-	IP = addr[0]
-  	x = ".".join(IP.split('.')[0:-1]) + '.'
-   	ID = int(IP.replace(x,''))
-	return ID
-=======
-	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][6:]
->>>>>>> Control
+	ip = get_ip()
+   	identifier = get_id_from_ip(ip)
+	return identifier
  
-def close_socket(sock):
-     sock.close()
+
+def string_to_command(data):
+	try:
+		command = data.split()
+		identifier = int(command[0])
+		parameter = command[1]
+		value = int(command[2])
+	except:
+		identifier = 0
+		parameter = ''
+		value = 0
+	return (identifier,parameter,value)
