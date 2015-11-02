@@ -1,13 +1,8 @@
 #!/usr/bin/python
 
 import socket
-<<<<<<< HEAD
-
 import subprocess
-=======
-import commands
-import time
->>>>>>> Control
+
 
 
 def send_broadcast_message(port, message):
@@ -86,7 +81,6 @@ def receive_message_list(sock):
 
 
 def get_ip():
-<<<<<<< HEAD
 	IP = subprocess.check_output(['hostname', '-I'])
  	IP = IP[:-2]
 	return IP
@@ -100,14 +94,11 @@ def get_id():
 	return ID
 
 
-def get_id_from_addr(addr):
+def get_id_from_ip(addr):
 	IP = addr[0]
   	x = ".".join(IP.split('.')[0:-1]) + '.'
    	ID = int(IP.replace(x,''))
 	return ID
-=======
-	return commands.getoutput("/sbin/ifconfig").split("\n")[16].split()[1][6:]
->>>>>>> Control
  
 def close_socket(sock):
      sock.close()
