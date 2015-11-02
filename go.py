@@ -18,6 +18,7 @@ prev_MODE = 'STOP'
 DISTANCE = 0
 SQUAD = []
 prev_messurement_time = 0
+prev_slow_time = 0
 message_buffer_slave = []
 message_buffer_master = []
 
@@ -129,7 +130,12 @@ try:
                 elif MODE == 'SLOW':
                     SPEED = SPEED_SLOW
                 elif MODE == 'WARN':
-                    SPEED = SPEED_WARN
+                    if time.time() - prev_slow_time > 0.02: # means slowing down from 75 to 25 in 1 second
+                         prev_slow_time = time.time()
+                         if SPEED > SPEED_WARN:
+                             SPEED-= 1
+                             prev_MODE == 'RUN'
+                    #    SPEED = SPEED_WARN
                 elif MODE == 'STOP':
                     SPEED = SPEED_STOP          
                 pi2go.go(SPEED,SPEED)
