@@ -9,6 +9,7 @@ Created on Wed Oct 28 21:43:35 2015
 import communication
 import pi2go
 import time
+from constants import *
 
 
 # Initail Values
@@ -18,20 +19,11 @@ prev_MODE = 'STOP'
 DISTANCE = 0
 SQUAD = []
 prev_messurement_time = 0
+prev_slow_time = 0
+
 message_buffer_slave = []
 message_buffer_master = []
 
-# Parameters
-SPEED_RUN = 75
-SPEED_SLOW = 50
-SPEED_WARN = 25
-SPEED_STOP = 0
-SQUAD_SIZE = 20
-LED_OFF = 0
-LED_ON = 1000
-PUSH = 5
-PORT = 5005
-BC_IP = '192.168.178.255'
 
 # Programm
 try:
@@ -40,7 +32,7 @@ try:
         if STATE == 'INIT':
             pi2go.init()
             sock = communication.init_nonblocking_receiver('',PORT)
-            for x in range(SQUAD_SIZE):
+            for x in range(NUMBER_OF_ROBOTS): # TODO: change name!
                 SQUAD.append(True)
                 message_buffer_slave.append(True)
             OWN_IP = communication.get_ip()
@@ -77,7 +69,7 @@ try:
                     if ID == OWN_ID:
                         print 'OWN: ' , ID, ' : ' , data
                         continue
-                    if ID >= 100 and ID <= 100+SQUAD_SIZE:
+                    if ID >= 100 and ID <= 100+NUMBER_OF_ROBOTS:
                         print 'ROBOT: ', ID, ' : ' , data
                         if data == 'PROBLEM':
                             curr_STATUS = False
@@ -129,7 +121,12 @@ try:
                 elif MODE == 'SLOW':
                     SPEED = SPEED_SLOW
                 elif MODE == 'WARN':
-                    SPEED = SPEED_WARN
+                    if time.time() - prev_slow_time > 0.02: # means slowing down from 75 to 25 in 1 second
+                         prev_slow_time = time.time()
+                         if SPEED > SPEED_WARN:
+                             SPEED-= 1
+                             prev_MODE == 'RUN'
+                    #    SPEED = SPEED_WARN
                 elif MODE == 'STOP':
                     SPEED = SPEED_STOP          
                 pi2go.go(SPEED,SPEED)
