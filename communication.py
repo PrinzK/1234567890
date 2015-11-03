@@ -2,10 +2,6 @@
 
 import socket
 import subprocess
-<<<<<<< HEAD
-=======
-
->>>>>>> 0be388872b37da8739d15f33c16bcc8731c55636
 
 
 def send_broadcast_message(port, message):
@@ -74,42 +70,18 @@ def receive_message_list(sock):
 
 
 def get_ip():
-<<<<<<< HEAD
 	ip = subprocess.check_output(['hostname', '-I'])
  	ip = ip[:-2]
 	return ip
 
 
 def get_id_from_ip(ip_addr):
-  	x = ".".join(ip_addr.split('.')[0:-1]) + '.'
-   	identifier = int(ip_addr.replace(x,''))
-	return identifier
-
+  	return ip_addr.split('.')[3]
 
 def get_id():
 	ip = get_ip()
    	identifier = get_id_from_ip(ip)
 	return identifier
-=======
-	IP = subprocess.check_output(['hostname', '-I'])
- 	IP = IP[:-2]
-	return IP
-
-
-def get_id():
-	IP = get_ip()
-  	x = ".".join(IP.split('.')[0:-1]) + '.'
-   	ID = int(IP.replace(x,''))
-  	#ID = int(IP[-3:])
-	return ID
-
-
-def get_id_from_ip(addr):
-	IP = addr[0]
-  	x = ".".join(IP.split('.')[0:-1]) + '.'
-   	ID = int(IP.replace(x,''))
-	return ID
->>>>>>> 0be388872b37da8739d15f33c16bcc8731c55636
  
 
 def string_to_command(data):
