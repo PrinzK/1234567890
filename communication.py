@@ -86,13 +86,17 @@ def get_id():
  
 
 def string_to_command(data):
-	try:
-		command = data.split()
-		identifier = int(command[0])
-		parameter = command[1]
-		value = int(command[2])
-	except:
-		identifier = 0
-		parameter = ''
-		value = 0
-	return (identifier,parameter,value)
+    try:
+        command = data.split(' ')
+        identifier = int(command[0])
+        parameter = command[1]
+        value = command[2]
+        if value == '+' or value == '-':
+            pass
+        else:
+            value = int(value)   
+    except:
+        identifier = 0
+        parameter = ''
+        value = 0
+    return (identifier,parameter,value)
