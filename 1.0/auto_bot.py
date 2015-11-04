@@ -17,14 +17,24 @@ prev_mode = 'RUN'
 speed = SPEED_RUN
 distance = 0
 prev_measurement_time = 0
+prev_measurement_time_switch = 0
+WAIT_SWITCH = 0.1
+
 
 # Programm
 try:
+    pi2go.init()
     while True:
         #loopstart = time.time()
-        if state == 'INIT':
-            pi2go.init()
-            state = 'RUNNING'
+        if state == 'IDLE':          
+            if time.time() - prev_measurement_time_switch > WAIT_SWITCH:
+                prev_measurement_time = time.time()  
+                button = pi2go.getSwitch()
+                if button:
+                    state = 'RUNNING'
+                    prev_measurement_time_switch += 5 
+                else: 
+                    state = 'IDLE'
 
         elif state == 'RUNNING':
             # Distance 
@@ -84,6 +94,16 @@ try:
                 elif mode == 'STOP':
                     speed = SPEED_STOP
                 pi2go.go(speed,speed)
+
+            # Switch
+            if time.time() - prev_measurement_time_switch > WAIT_SWITCH:
+                prev_measurement_time = time.time()  
+                button = pi2go.getSwitch()
+                if button:
+                    state = 'IDLE'
+                    prev_measurement_time_switch += 5 
+                else: 
+                    state = 'RUNNING'
        
         else:
             print 'impossible state'

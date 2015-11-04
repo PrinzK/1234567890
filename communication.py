@@ -76,7 +76,7 @@ def get_ip():
 
 
 def get_id_from_ip(ip_addr):
-  	return ip_addr.split('.')[3]
+  	return int(ip_addr.split('.')[3])
 
 
 def get_id():
