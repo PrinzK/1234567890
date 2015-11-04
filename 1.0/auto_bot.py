@@ -11,7 +11,7 @@ import time
 from constants import * 
 
 # Initail Values
-state = 'INIT'
+state = 'IDLE'
 mode = 'STOP'
 prev_mode = 'RUN'
 speed = SPEED_RUN
@@ -19,7 +19,7 @@ distance = 0
 prev_measurement_time = 0
 prev_measurement_time_switch = 0
 WAIT_SWITCH = 0.1
-
+SWITCH_DEAD_TIME = 1
 
 # Programm
 try:
@@ -27,14 +27,19 @@ try:
     while True:
         #loopstart = time.time()
         if state == 'IDLE':          
+            pi2go.setAllLEDs(LED_OFF,LED_OFF,LED_OFF)
             if time.time() - prev_measurement_time_switch > WAIT_SWITCH:
-                prev_measurement_time = time.time()  
+                prev_measurement_time_switch = time.time()  
                 button = pi2go.getSwitch()
+                print "Button: ", button
                 if button:
                     state = 'RUNNING'
-                    prev_measurement_time_switch += 5 
+                    prev_mode = 'blabla'
+                    pi2go.setAllLEDs(LED_ON,LED_OFF,LED_OFF)
+                    prev_measurement_time_switch += SWITCH_DEAD_TIME 
                 else: 
                     state = 'IDLE'
+                print state
 
         elif state == 'RUNNING':
             # Distance 
@@ -97,17 +102,18 @@ try:
 
             # Switch
             if time.time() - prev_measurement_time_switch > WAIT_SWITCH:
-                prev_measurement_time = time.time()  
+                prev_measurement_time_switch = time.time()  
                 button = pi2go.getSwitch()
                 if button:
                     state = 'IDLE'
-                    prev_measurement_time_switch += 5 
+                    prev_measurement_time_switch += SWITCH_DEAD_TIME
+                    pi2go.stop()
                 else: 
                     state = 'RUNNING'
        
         else:
             print 'impossible state'
-            state == 'RUNNING'
+            state == 'IDLE'
         #print "Loop: ", time.time() - loopstart
             
 except KeyboardInterrupt:
