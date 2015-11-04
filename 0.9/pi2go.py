@@ -83,6 +83,7 @@
 # UltraSonic Functions
 # (Both Versions)
 #
+# getDistance(). Returns the distance in cm to the nearest reflecting object. 0 == no object
 #======================================================================
 
 
@@ -612,11 +613,11 @@ def getDistance():
     start = time.time()
     count=time.time()
     GPIO.setup(sonar,GPIO.IN)
-    while GPIO.input(sonar)==0 and time.time()-count<0.1:
+    while GPIO.input(sonar)==0 and time.time()-count<0.01:
         start = time.time()
     count=time.time()
     stop=count
-    while GPIO.input(sonar)==1 and time.time()-count<0.1:
+    while GPIO.input(sonar)==1 and time.time()-count<0.01:
         stop = time.time()
     # Calculate pulse length
     elapsed = stop-start
