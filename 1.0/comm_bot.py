@@ -9,17 +9,16 @@ Created on Wed Oct 28 21:43:35 2015
 import communication
 import pi2go
 import time
-from crashing_constants import *
+from constants import *
 
 # Initail Values
 state = 'INIT'
 mode = 'STOP'
-prev_mode = 'STOP'
+prev_mode = 'RUN'
+speed = SPEED_RUN
 distance = 0
 squad = []
-prev_messurement_time = 0
-message_buffer_slave = []
-message_buffer_master = []
+prev_measurement_time = 0
 
 
 # Programm
@@ -31,7 +30,6 @@ try:
             sock = communication.init_nonblocking_receiver('',PORT)
             for x in range(SQUAD_SIZE):
                 squad.append(True)
-                message_buffer_slave.append(True)
             OWN_IP = communication.get_ip()
             OWN_IDENTIFIER = communication.get_id_from_ip(OWN_IP)
             print OWN_IDENTIFIER
@@ -40,13 +38,13 @@ try:
 
         elif state == 'RUNNING':
             # distance         
-            if time.time() - prev_messurement_time > WAIT_DIST:
-                prev_messurement_time = time.time()                
-                distance = pi2go.getdistance()
+            if time.time() - prev_measurement_time > WAIT_DIST:
+                prev_measurement_time = time.time()                
+                distance = pi2go.getDistance()
             
             # Obstacle = 1, No Obstacle = 0
             irCentre = pi2go.irCentre()
-            
+            #irCentre = False
             # Obstacle Analysis
             if irCentre or (distance < DIST_MIN):
                 distance_area = 0
@@ -60,7 +58,7 @@ try:
             while data != '':
                 data, addr = communication.receive_message(sock) 
                 if data != '':
-                    ID = communication.get_id_from_ip(addr[0])
+                    identifier = communication.get_id_from_ip(addr[0])
                     if identifier == OWN_IDENTIFIER:
                         print 'OWN: ' , identifier, ' : ' , data
                         continue
@@ -69,11 +67,11 @@ try:
                         if data == 'PROBLEM':
                             curr_status = False
                             #squad[id-SQUAD_START] = curr_status
-                            squad[identifier] = curr_status
+                            squad[identifier-SQUAD_START] = curr_status
                         elif data == 'RELEASE':
                             curr_status = True
                             #squad[id-SQUAD_START] = curr_status
-                            squad[identifier] = curr_status
+                            squad[identifier-SQUAD_START] = curr_status
                     else:
                         print 'MASTER:' , identifier , ' : ' , data
                         # make List with Master commands an react on this
@@ -97,10 +95,10 @@ try:
             if mode != prev_mode:                          
                 if mode == 'STOP':
                     #squad[OWN_IDENTIFIER-SQUAD_START] = False
-                    squad[OWN_IDENTIFIER] = False
+                    squad[OWN_IDENTIFIER-SQUAD_START] = False
                 else:
                     #squad[OWN_IDENTIFIER-SQUAD_START] = True
-                    squad[OWN_IDENTIFIER] = True
+                    squad[OWN_IDENTIFIER-SQUAD_START] = True
 
             # LEDs  
             if mode != prev_mode:                          
@@ -112,17 +110,6 @@ try:
                     pi2go.setAllLEDs(LED_ON,LED_ON,LED_OFF)
                 elif mode == 'STOP':
                     pi2go.setAllLEDs(LED_ON,LED_OFF,LED_OFF)
-                    
-            # distance controller
-            if mode == 'SLOW':
-                SPEED_SLOW = SPEED_RUN - (DIST_REF-distance) * KP
-                # Controlllimits
-                if SPEED_SLOW > SPEED_CONTROL_MAX:
-                    SPEED_SLOW = SPEED_CONTROL_MAX
-                elif SPEED_SLOW < SPEED_CONTROL_MIN:
-                    SPEED_SLOW = SPEED_CONTROL_MIN
-                print 'DIST: ', distance , 'SPEED: ', SPEED_SLOW
-                        
             
             # Motor
             if mode != prev_mode:                          
@@ -133,12 +120,7 @@ try:
                 elif mode == 'WARN':
                     speed = SPEED_WARN
                 elif mode == 'STOP':
-                    speed = SPEED_STOP 
-                # Speedlimits
-                if speed > 100:
-                    speed = 100
-                elif speed < 0:
-                    speed = 0
+                    speed = SPEED_STOP
                 pi2go.go(speed,speed)
                 
             # Send
@@ -152,7 +134,7 @@ try:
                 elif mode == 'STOP':
                     #print 'PROBLEM'
                     message = 'PROBLEM'
-                    for x in range(PUSH):
+                    for x in range(SENDING_ATTEMPTS):
                         communication.send_broadcast_message(PORT, message)
                         time.sleep(WAIT_SEND)
        

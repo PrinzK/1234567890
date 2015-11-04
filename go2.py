@@ -12,10 +12,10 @@ import time
 from crashing_constants import *
 
 # Initail Values
-STATE = 'INIT'
-MODE = 'STOP'
-prev_MODE = 'STOP'
-DISTANCE = 0
+state = 'INIT'
+mode = 'STOP'
+prev_mode = 'STOP'
+distance = 0
 SQUAD = []
 prev_messurement_time = 0
 message_buffer_slave = []
@@ -39,10 +39,10 @@ try:
 
 
         elif STATE == 'RUNNING':
-            # Distance         
+            # distance         
             if time.time() - prev_messurement_time > WAIT_DIST:
                 prev_messurement_time = time.time()                
-                distance = pi2go.getDistance()
+                distance = pi2go.getdistance()
             
             # Obstacle = 1, No Obstacle = 0
             irCentre = pi2go.irCentre()
@@ -77,25 +77,25 @@ try:
                     else:
                         print 'MASTER:' , ID , ' : ' , data
                         # make List with Master commands an react on this
-                        # change MODE, STATUS, SPEED, DISTANCELIMITS
+                        # change mode, STATUS, SPEED, distanceLIMITS
                     
-            # Analyse --> Calculate MODE
-            prev_MODE = MODE
+            # Analyse --> Calculate mode
+            prev_mode = mode
             if distance_level == 0:
-                MODE = 'STOP'
+                mode = 'STOP'
             elif distance_level == 1 and all(SQUAD):
-                MODE = 'SLOW'
+                mode = 'SLOW'
             elif distance_level == 2 and all(SQUAD):
-                MODE = 'RUN'
+                mode = 'RUN'
             elif distance_level != 0 and not all(SQUAD):
-                MODE = 'WARN'
+                mode = 'WARN'
             else:
-                print 'check MODE-Conditions'
+                print 'check mode-Conditions'
                 break
             
             # Set own SQUAD_VALUE  
-            if MODE != prev_MODE:                          
-                if MODE == 'STOP':
+            if mode != prev_mode:                          
+                if mode == 'STOP':
                     #SQUAD[OWN_ID-SQUAD_START] = False
                     SQUAD[OWN_ID] = False
                 else:
@@ -103,36 +103,36 @@ try:
                     SQUAD[OWN_ID] = True
 
             # LEDs  
-            if MODE != prev_MODE:                          
-                if MODE == 'RUN':
+            if mode != prev_mode:                          
+                if mode == 'RUN':
                     pi2go.setAllLEDs(LED_OFF,LED_ON,LED_OFF)
-                elif MODE == 'SLOW':
+                elif mode == 'SLOW':
                     pi2go.setAllLEDs(LED_OFF,LED_OFF,LED_ON)
-                elif MODE == 'WARN':
+                elif mode == 'WARN':
                     pi2go.setAllLEDs(LED_ON,LED_ON,LED_OFF)
-                elif MODE == 'STOP':
+                elif mode == 'STOP':
                     pi2go.setAllLEDs(LED_ON,LED_OFF,LED_OFF)
                     
-            # Distance controller
-            if MODE == 'SLOW':
-                SPEED_SLOW = SPEED_RUN - (DIST_REF-DISTANCE) * KP
+            # distance controller
+            if mode == 'SLOW':
+                SPEED_SLOW = SPEED_RUN - (DIST_REF-distance) * KP
                 # Controlllimits
                 if SPEED_SLOW > SPEED_CONTROL_MAX:
                     SPEED_SLOW = SPEED_CONTROL_MAX
                 elif SPEED_SLOW < SPEED_CONTROL_MIN:
                     SPEED_SLOW = SPEED_CONTROL_MIN
-                print 'DIST: ', DISTANCE , 'SPEED: ', SPEED_SLOW
+                print 'DIST: ', distance , 'SPEED: ', SPEED_SLOW
                         
             
             # Motor
-            if MODE != prev_MODE:                          
-                if MODE == 'RUN':
+            if mode != prev_mode:                          
+                if mode == 'RUN':
                     SPEED = SPEED_RUN
-                elif MODE == 'SLOW':
+                elif mode == 'SLOW':
                     SPEED = SPEED_SLOW
-                elif MODE == 'WARN':
+                elif mode == 'WARN':
                     SPEED = SPEED_WARN
-                elif MODE == 'STOP':
+                elif mode == 'STOP':
                     SPEED = SPEED_STOP 
                 # Speedlimits
                 if SPEED > 100:
@@ -142,14 +142,14 @@ try:
                 pi2go.go(SPEED,SPEED)
                 
             # Send
-            if MODE != prev_MODE:                          
-                if prev_MODE == 'STOP':
+            if mode != prev_mode:                          
+                if prev_mode == 'STOP':
                     #print 'RELEASE'
                     message = 'RELEASE'
                     for x in range(SENDING_ATTEMPTS):
                         communication.send_broadcast_message(PORT, message)
                         time.sleep(WAIT_SEND)                    
-                elif MODE == 'STOP':
+                elif mode == 'STOP':
                     #print 'PROBLEM'
                     message = 'PROBLEM'
                     for x in range(PUSH):

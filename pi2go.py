@@ -134,10 +134,11 @@ R1 = 19
 R2 = 21
 
 # Define obstacle sensors and line sensors
-irFL = 7
-irFR = 11
-irMID = 15  # this sensor not available on Lite version
-lineRight = 13
+# edit from christopher: oiginal values irFL = 7, irFR = 11, irMID = 15, lineRight = 13, lineLeft = 12
+irFL = 11
+irFR = 7
+irMID = 13  # this sensor not available on Lite version
+lineRight = 15
 lineLeft = 12
 
 # Define Colour IDs for the RGB LEDs (Pi2Go full only)
