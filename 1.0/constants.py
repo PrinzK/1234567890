@@ -1,5 +1,4 @@
 # system variables
-#NUMBER_OF_ROBOTS = 10
 SQUAD_SIZE = 20
 SQUAD_START = 100
 AUTO_BOT_SIZE = 5
