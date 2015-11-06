@@ -37,7 +37,9 @@ while True:
         communication.send_broadcast_message(c.PORT, message)
     else:
         #len(identifier) > 3:
-            # parsing 
+    
+    
+            # parsing identififer
             if len(identifier) == 1:
                 identifier = '0' + identifier
             identifier = '1' + identifier
@@ -46,10 +48,13 @@ while True:
                 print "NO ROBOT WITH THIS ID IN SQUAD. \nrepeat!"
                 continue
             
+            # parsing command            
             command = raw_input("Type command: (s)peed, (m)ode ")
             command = command.lower()
-            if command == 'm':
+            # mode change
+            if command == 'm':                
                 command = c.COMMAND_MODE
+                # parsing value
                 value = raw_input("Type mode: i(d)le | i(n)it")
                 value = value.lower()
                 if value == 'd':
@@ -58,8 +63,11 @@ while True:
                     value = c.VALUE_MODE_INIT
                 else:
                     print "MODE NOT RECOGNIZED"
-            elif command == 's':
+                
+                # speed change
+            elif command == 's':                
                 command = c.COMMAND_SPEED
+                #parsing value
                 value = raw_input("Type absolute value or \'+\' or \'-\'")
                 if value == '+':
                     value = c.VALUE_SPEED_INCREMENT
@@ -69,20 +77,20 @@ while True:
                     try:
                         int(value)
                     except:
-                        print 'VALUE NOT NEITHER \'+\' or \'-\' NOR AN INTEGER \n repeat!'
+                        print 'VALUE NEITHER \'+\' or \'-\' NOR AN INTEGER \nrepeat!'
                         continue
                     if 0 < int(value) or int(value) > 100:
                         print 'VALUE NOT IN RANGE \nrepeat!'
                         continue
-                    # everything should be valid...
-                    else:
-                        message = identifier + " " + command + " " + value    
+                    
+            
             else:
                 print 'COMMAND UNKNOWN! \n repeat!'
                 continue
-            
+            # everything should be valid...
+            message = identifier + " " + command + " " + value    
             print 'Sent message: ' + message
-            communication.send_broadcast_message(PORT, message)
+            communication.send_broadcast_message(c.PORT, message)
                 
                 
             
