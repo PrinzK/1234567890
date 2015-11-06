@@ -1,5 +1,6 @@
 from communication import *
 import time
+from constants import *
 
 
 def test_receiver(address, port):
@@ -74,3 +75,8 @@ def test_update_state_list():
     
 #test_receive_message_list()
 test_update_state_list()
+
+def test_commands(identifier):
+    print "Slowing all to 40"
+    message = identifier + " speed " + 
+    send_broadcast_message(PORT, identifier)

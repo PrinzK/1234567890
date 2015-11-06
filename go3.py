@@ -61,10 +61,7 @@ KP = float(SPEED_CONTROL_MAX - SPEED_CONTROL_MIN)/float(DIST_MAX-DIST_MIN)
 
 # Programm
 try:
-    while True:
-
-
-        
+    while True:  
         if STATE == 'INIT':
             pi2go.init()
             pi2go.setAllLEDs(LED_ON,LED_ON,LED_ON)
