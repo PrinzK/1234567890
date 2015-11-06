@@ -1,6 +1,15 @@
 import communication
 import constants as c
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 sock = communication.init_nonblocking_receiver('', c.PORT)
 message = ''
@@ -28,47 +37,102 @@ def stop_all_robots():
     
 def set_speed(robot, speed):
     pass
-
+print bcolors.UNDERLINE + "Either type command in form IDcommandvalue or one after the other. To repeat the last command, simply press 'r' and enter'\n" + bcolors.ENDC
 while True:
-    print "Either type command in form IDcommandvalue or one after the other. To repeat the last command, simply press 'r' and enter"
-    identifier = raw_input()
+    print "_" * 100
+    identifier = raw_input('ID [0:11] or whole command: \t\t\t')
     if identifier == 'r':
-        print "Repeating last command: " + message
-        communication.send_broadcast_message(c.PORT, message)
+        if message == '':
+            print bcolors.FAIL + 'No message sent so far!' + bcolors.ENDC
+        else:
+            print bcolors.OKGREEN + "Repeating last command:\t\t\t\t" + bcolors.OKBLUE + message + bcolors.ENDC
+            communication.send_broadcast_message(c.PORT, message)
     else:
-        #len(identifier) > 3:
-    
-    
+        # one-input mode
+        if len(identifier) > 2:
+            string = identifier
+            if not string[0].isdigit():
+                print bcolors.FAIL + 'First character must be digit!' + bcolors.ENDC
+                continue
+            if string[1].isdigit():
+                identifier = '1' + string[0:1]
+                string = string[2:]
+                
+            else:
+                identifier = str('10' + string[0])
+                string = string[1:]
+            # mode command
+            if string[0].lower() == 'm':
+                command = c.COMMAND_MODE
+                string = string[1:]
+                if 'd' in string.lower():
+                    value = c.VALUE_MODE_IDLE
+                elif 'n' in string.lower():
+                    value = c.VALUE_MODE_INIT
+                else:
+                    print bcolors.FAIL + "MODE NOT RECOGNIZED" + bcolors.ENDC
+                    continue
+            # speed commmand
+            elif string[0].lower() == 's':
+                command = c.COMMAND_SPEED
+                string = string[1:]
+                if string[0] == '+':
+                    value = c.VALUE_SPEED_INCREMENT
+                elif string[0] == '-':
+                    value = c.VALUE_SPEED_DECREMENT
+                else:
+                    try:                        
+                        value = str(int(string))
+                    except ValueError:
+                        print bcolors.FAIL + 'VALUE NOT AN INTEGER \nrepeat!' + bcolors.ENDC
+                        continue
+                    print value                                                                    
+            # blink command        
+            elif string[0].lower() == 'b':
+                commmand = c.COMMAND_BLINK
+                value = ''
+            else:
+                print bcolors.FAIL + 'COMMAND UNKNOWN! \n repeat!' + bcolors.ENDC
+                continue
+                
+        # sequential input mode
+        else:
             # parsing identififer
             if len(identifier) == 1:
                 identifier = '0' + identifier
             identifier = '1' + identifier
-            print 'Talking to robot with id ' + identifier
+            #print 'Talking to robot with id ' + identifier
+            try: 
+                int(identifier)
+            except ValueError:
+                print bcolors.FAIL + 'VALUE NOT AN INTEGER \nrepeat!' + bcolors.ENDC
+                continue
+                
             if c.SQUAD_START > int(identifier) or int(identifier) > c.SQUAD_END:
-                print "NO ROBOT WITH THIS ID IN SQUAD. \nrepeat!"
+                print bcolors.FAIL + "NO ROBOT WITH THIS ID IN SQUAD. \nrepeat!" + bcolors.ENDC
                 continue
             
             # parsing command            
-            command = raw_input("Type command: (s)peed, (m)ode ")
+            command = raw_input("Type command:\t(s)peed | (m)ode | (b)link\t")
             command = command.lower()
             # mode change
             if command == 'm':                
                 command = c.COMMAND_MODE
                 # parsing value
-                value = raw_input("Type mode: i(d)le | i(n)it")
+                value = raw_input("Type mode:\t i(d)le | i(n)it\t\t")
                 value = value.lower()
                 if value == 'd':
                     value = c.VALUE_MODE_IDLE
                 elif value == 'n':
                     value = c.VALUE_MODE_INIT
                 else:
-                    print "MODE NOT RECOGNIZED"
-                
-                # speed change
+                    print bcolors.FAIL + "MODE NOT RECOGNIZED" + bcolors.ENDC
+                    continue
+            # speed change
             elif command == 's':                
                 command = c.COMMAND_SPEED
                 #parsing value
-                value = raw_input("Type absolute value or \'+\' or \'-\'")
+                value = raw_input("Type absolute value OR \'+\' or \'-\'\t")
                 if value == '+':
                     value = c.VALUE_SPEED_INCREMENT
                 elif value == '-':
@@ -76,22 +140,26 @@ while True:
                 else:
                     try:
                         int(value)
-                    except:
-                        print 'VALUE NEITHER \'+\' or \'-\' NOR AN INTEGER \nrepeat!'
+                    except ValueError:
+                        print bcolors.FAIL + 'VALUE NEITHER \'+\' or \'-\' NOR AN INTEGER \nrepeat!' + bcolors.ENDC
                         continue
-                    if 0 < int(value) or int(value) > 100:
+                    if 0 > int(value) or int(value) > 100:
                         print 'VALUE NOT IN RANGE \nrepeat!'
                         continue
-                    
-            
+            # blink       
+            elif command == 'b':                
+                command = c.COMMAND_BLINK
+                value = ""
+                
+
             else:
-                print 'COMMAND UNKNOWN! \n repeat!'
+                print bcolors.FAIL + 'COMMAND UNKNOWN! \n repeat!' + bcolors.ENDC
                 continue
             # everything should be valid...
-            message = identifier + " " + command + " " + value    
-            print 'Sent message: ' + message
-            communication.send_broadcast_message(c.PORT, message)
-                
+        message = identifier + " " + command + " " + value    
+        print bcolors.OKGREEN +  'Sent message:\t\t\t\t\t' + bcolors.OKBLUE + message + bcolors.ENDC
+        communication.send_broadcast_message(c.PORT, message)
+    
                 
             
     
