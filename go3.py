@@ -87,13 +87,13 @@ try:
             if time.time() - prev_measurement_time_switch > WAIT_SWITCH:
                 prev_measurement_time_switch = time.time()
                 # Pressed = 1, Released = 0
-                button = pi2go.getSwitch()
+                """button = pi2go.getSwitch()
                 if not button:
                     button_release = True
                 if button and button_release:
                     button_release = False
                     prev_STATE = STATE
-                    STATE = 'RUNNING'
+                    STATE = 'RUNNING'"""
                 #print 'STATE:', STATE , 'RELEASE:', button_release , 'BUTTON:' , button
 
 
@@ -136,7 +136,7 @@ try:
                         #print 'MASTER:' , ID , ' : ' , data
                         ID, PARAM, VALUE = communication.string_to_command(data)
                         if ID == OWN_ID:
-                            #print 'MasterID: ', ID , 'PARAM: ' , PARAM , 'VALUE: ' , VALUE
+                            print 'MasterID: ', ID , 'PARAM: ' , PARAM , 'VALUE: ' , VALUE
                             if PARAM == c.COMMAND_SPEED:
                                 master_set_speed = True
                                 prev_SPEED_RUN = SPEED_RUN
@@ -164,7 +164,9 @@ try:
                                     LED_ON = 0
                                 print 'Set LED_ON from '+ str(prev_LED_ON) + ' to ' + str(LED_ON)
                             elif PARAM == c.COMMAND_MODE:    
-                                print 'master want to change MODE'
+                                print 'master wants to change state to ' + VALUE.upper()
+                                STATE = VALUE.upper()
+                                
                         # change MODE, STATUS, SPEED, DISTANCELIMITS#
                                     
             # Analyse --> Calculate MODE
@@ -278,7 +280,7 @@ try:
                         time.sleep(WAIT_SEND)
 
             # Button
-            if time.time() - prev_measurement_time_switch > WAIT_SWITCH:
+            """if time.time() - prev_measurement_time_switch > WAIT_SWITCH:
                 prev_measurement_time_switch = time.time()
                 # Pressed = 1, Released = 0
                 button = pi2go.getSwitch()
@@ -288,7 +290,7 @@ try:
                     button_release = False
                     prev_STATE = STATE
                     STATE = 'IDLE'
-                #print 'STATE:', STATE , 'RELEASE:', button_release , 'BUTTON:' , button
+                #print 'STATE:', STATE , 'RELEASE:', button_release , 'BUTTON:' , button"""
 
         
         else:

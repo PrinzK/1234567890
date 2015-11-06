@@ -40,24 +40,26 @@ def set_speed(robot, speed):
 print bcolors.UNDERLINE + "Either type command in form IDcommandvalue or one after the other. To repeat the last command, simply press 'r' and enter'\n" + bcolors.ENDC
 while True:
     print "_" * 100
-    identifier = raw_input('ID [0:11] or whole command: \t\t\t')
+    identifier = raw_input('ID ([0:11] or \'a\') or whole command: \t\t')
     if identifier == 'r':
         if message == '':
             print bcolors.FAIL + 'No message sent so far!' + bcolors.ENDC
         else:
             print bcolors.OKGREEN + "Repeating last command:\t\t\t\t" + bcolors.OKBLUE + message + bcolors.ENDC
             communication.send_broadcast_message(c.PORT, message)
+    # not repeating        
     else:
         # one-input mode
         if len(identifier) > 2:
             string = identifier
-            if not string[0].isdigit():
+            if string[0].lower() == 'a':
+                identifier = 'a'
+            elif not string[0].isdigit():
                 print bcolors.FAIL + 'First character must be digit!' + bcolors.ENDC
                 continue
-            if string[1].isdigit():
-                identifier = '1' + string[0:1]
+            elif string[1].isdigit():
+                identifier = str("1" + string[0:2])
                 string = string[2:]
-                
             else:
                 identifier = str('10' + string[0])
                 string = string[1:]
@@ -86,7 +88,6 @@ while True:
                     except ValueError:
                         print bcolors.FAIL + 'VALUE NOT AN INTEGER \nrepeat!' + bcolors.ENDC
                         continue
-                    print value                                                                    
             # blink command        
             elif string[0].lower() == 'b':
                 commmand = c.COMMAND_BLINK
@@ -155,10 +156,20 @@ while True:
             else:
                 print bcolors.FAIL + 'COMMAND UNKNOWN! \n repeat!' + bcolors.ENDC
                 continue
-            # everything should be valid...
-        message = identifier + " " + command + " " + value    
-        print bcolors.OKGREEN +  'Sent message:\t\t\t\t\t' + bcolors.OKBLUE + message + bcolors.ENDC
-        communication.send_broadcast_message(c.PORT, message)
+        # everything should be valid...
+        # to all...
+        if identifier == 'a':
+            for identifier in range(c.SQUAD_START, c.SQUAD_END + 1):
+                target_ip = c.SUBNET_IP + identifier
+                message = identifier + " " + command + " " + value    
+                communication.send_udp_unicast_message(target_ip, c.PORT, message)
+        # to one bot
+        else:
+            target_ip = c.SUBNET_IP + identifier
+            message = identifier + " " + command + " " + value    
+            print bcolors.OKGREEN +  'Sent message:\t\t\t\t\t' + bcolors.OKBLUE + message + bcolors.ENDC
+        
+        communication.send_udp_unicast_message(target_ip, c.PORT, message)
     
                 
             

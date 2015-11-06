@@ -92,7 +92,7 @@ def string_to_command(data):
         identifier = int(command[0])
         parameter = command[1]
         value = command[2]
-        if parameter != c.COMMAND_SPEED and (value == '+' or value == '-'):
+        if parameter != c.COMMAND_SPEED or (value == '+' or value == '-'):
             pass
         else:
             value = int(value)
