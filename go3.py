@@ -7,6 +7,7 @@ Created on Wed Oct 28 21:43:35 2015
 
 # Libraries
 import communication
+import constants as c
 import pi2go
 import time
 
@@ -34,13 +35,14 @@ SPEED = 0
 
 # Parameters
 SPEED_RUN = 75
+SPEED_RUN = c.SPEED_RUN
 SPEED_SLOW = 50
 SPEED_WARN = 25
 SPEED_WARN_NEW = 25
 SPEED_STOP = 0
-SPEED_CONTROL_MAX = SPEED_RUN
-SPEED_CONTROL_MIN = SPEED_SLOW
-SQUAD_SIZE = 20
+SPEED_CONTROL_MAX = SPEED_RUN-5
+SPEED_CONTROL_MIN = SPEED_STOP
+SQUAD_SIZE = 15
 SQUAD_START = 100
 DIST_MIN = 20
 DIST_MAX = 50
@@ -50,7 +52,7 @@ WAIT_SEND = 0.00001
 WAIT_SWITCH = 0.1
 WAIT_AVOID = 0.5  
 WAIT_RAMP = 0.25
-TIME_TO_STOP = 5
+TIME_TO_STOP = 3
 LED_ON = 1000
 LED_OFF = 0
 PUSH = 5
@@ -63,8 +65,6 @@ KP = float(SPEED_CONTROL_MAX - SPEED_CONTROL_MIN)/float(DIST_MAX-DIST_MIN)
 try:
     while True:
 
-
-        
         if STATE == 'INIT':
             pi2go.init()
             pi2go.setAllLEDs(LED_ON,LED_ON,LED_ON)
@@ -77,11 +77,9 @@ try:
             OWN_ID = communication.get_id_from_ip(OWN_IP)
             #print 'ID:' , OWN_ID
             prev_STATE = STATE
-            #STATE = 'IDLE'
+            STATE = 'IDLE'
             STATE = 'RUNNING'
             #print 'STATE:', STATE , 'RELEASE:', button_release
-
-            
 
         if STATE == 'IDLE':
             if prev_STATE != 'IDLE':
@@ -247,7 +245,7 @@ try:
                 elif MODE == 'SLOW':
                     SPEED = SPEED_SLOW
                     if blocking_avoidance:
-                        print 'speed_avoidance' , SPEED
+                        print 'speed_avoidance:' , SPEED
                     blocking_avoidance = False
                 elif MODE == 'WARN':
                     SPEED = SPEED_WARN
