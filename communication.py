@@ -2,6 +2,7 @@
 
 import socket
 import subprocess
+import constants as c
 
 
 def send_broadcast_message(port, message):
@@ -91,10 +92,10 @@ def string_to_command(data):
         identifier = int(command[0])
         parameter = command[1]
         value = command[2]
-        if value == '+' or value == '-':
+        if parameter != c.COMMAND_SPEED and (value == '+' or value == '-'):
             pass
         else:
-            value = int(value)   
+            value = int(value)
     except:
         identifier = 0
         parameter = ''
