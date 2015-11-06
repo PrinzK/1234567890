@@ -102,7 +102,7 @@ try:
             if time.time() - prev_messurement_time_dist > WAIT_DIST:
                 prev_messurement_time_dist = time.time()                
                 distance = pi2go.getDistance()
-                print distance
+                #print distance
             
             # Obstacle = 1, No Obstacle = 0
             irCentre = pi2go.irCentre()
@@ -137,7 +137,7 @@ try:
                         ID, PARAM, VALUE = communication.string_to_command(data)
                         if ID == OWN_ID:
                             #print 'MasterID: ', ID , 'PARAM: ' , PARAM , 'VALUE: ' , VALUE
-                            if PARAM == 'speed':
+                            if PARAM == c.COMMAND_SPEED:
                                 master_set_speed = True
                                 prev_SPEED_RUN = SPEED_RUN
                                 if VALUE == '+':
@@ -146,7 +146,10 @@ try:
                                     SPEED_RUN -= 1
                                 else:
                                     SPEED_RUN = VALUE
-                                print 'Set SPEED_RUN from '+ str(prev_SPEED_RUN) + ' to ' + str(SPEED_RUN)           
+                                print 'Set SPEED_RUN from '+ str(prev_SPEED_RUN) + ' to ' + str(SPEED_RUN)
+                            elif PARAM == c.COMMAND_BLINK:
+                                pi2go.setAllLEDs(LED_ON, LED_ON, LED_ON)
+                                pi2go.setAllLEDs(LED_OFF, LED_OFF, LED_OFF)
                             elif PARAM == 'dist':
                                 prev_DIST_MIN = DIST_MIN
                                 DIST_MIN = VALUE
@@ -160,7 +163,7 @@ try:
                                 elif LED_ON < 0:
                                     LED_ON = 0
                                 print 'Set LED_ON from '+ str(prev_LED_ON) + ' to ' + str(LED_ON)
-                            elif PARAM == 'mode':    
+                            elif PARAM == c.COMMAND_MODE:    
                                 print 'master want to change MODE'
                         # change MODE, STATUS, SPEED, DISTANCELIMITS#
                                     
