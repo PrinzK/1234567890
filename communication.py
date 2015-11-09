@@ -91,17 +91,9 @@ def get_id():
  
 
 def string_to_command(data):
-    try:
-        command = data.split(' ')
-        identifier = int(command[0])
-        parameter = command[1]
-        value = command[2]
-        if parameter != c.COMMAND_SPEED or (value == '+' or value == '-'):
-            pass
-        else:
-            value = int(value)
-    except:
-        identifier = 0
-        parameter = ''
-        value = 0
-    return (identifier,parameter,value)
+    strings = data.split(' ')
+    command = strings[0]
+    value = strings[1]
+    if command == c.COMMAND_SPEED and value.isdigit():
+        value = int(value)
+    return (command,value)

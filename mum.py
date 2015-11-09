@@ -1,5 +1,5 @@
-import communication
-import comm_bot_test
+import communication as com
+import comm_bot.start
 import auto_bot_test
 import pi2go
 import time
@@ -39,41 +39,45 @@ def blink(color = 'white'):
     pi2go.setAllLEDs(c.LED_OFF, c.LED_OFF, c.LED_OFF)
 
 
-sock = communication.init_receiver('', c.PORT)
+sock = com.init_receiver('', c.PORT)
 
 
 print "Hey there!"
 
 try:
-    message, addr = communication.receive_message(sock)
-    communication.close_socket(sock)
+    data, addr = com.receive_message(sock)
+    command, value = com.string_to_command(data)
+    com.close_socket(sock)
     while True:
-        if c.COMMAND_GO_COMM in message:
+        if c.VALUE_TYPE_COM == value:
             blink('yellow')
-            status = "I'm in comm_mode now!"            
+            status = "I'm in com_mode now!"            
             print status
             #communication.send_broadcast_message(c.PORT, status)             
-            message = comm_bot_test.start()            
-            status = "Exiting comm_mode"
+            value = comm_bot.start()            
+            status = "Exiting com_mode"
             print status
             #communication.send_broadcast_message(c.PORT, status)
-        elif c.COMMAND_GO_AUTO in message:
+        elif c.VALUE_TYPE_COMM == value:
             blink('red')
             status ="I'm in auto_mode now!"            
             print status
             #communication.send_broadcast_message(PORT, status)
-            message = auto_bot_test.start()
+            value = auto_bot_test.start()
             status = "Exiting auto_mode"
             print status
             #communication.send_broadcast_message(PORT, status)
-        elif "GO_IDLE" in message:
+        elif c.VALUE_TYPE_IDLE == value:
             blink('white')
             status = "I'm in idle_mode now!"
             print status
             #communication.send_broadcast_message(PORT, status)
-            sock = communication.init_receiver('', c.PORT)
-            message, addr = communication.receive_message(sock)
-            communication.close_socket(sock)
+            sock = com.init_receiver('', c.PORT)
+            data, addr = com.receive_message(sock)
+            command, value = com.string_to_command(data)
+            if command != c.COMMAND_TYPE:
+                value = c.VALUE_TYPE_IDLE
+            com.close_socket(sock)
             status = "Exiting idle_mode"
             print status
             #communication.send_broadcast_message(c.PORT, status)

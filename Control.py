@@ -42,12 +42,12 @@ def set_speed(robot, speed):
 print bcolors.UNDERLINE + "Either type command in form IDcommandvalue or one after the other. To repeat the last command, simply press 'r' and enter'\n" + bcolors.ENDC
 while True:
     print "_" * 100
-    identifier = raw_input('ID ([0:11] or \'a\') or whole command: \t\t')
+    identifier = raw_input('ID ([0:11] or \'a\') or whole command: \t\t\t')
     if identifier == 'r':
         if message == '':
             print bcolors.FAIL + 'No message sent so far!' + bcolors.ENDC
         else:
-            print bcolors.OKGREEN + "Repeating last command:\t\t\t\t" + bcolors.OKBLUE + message + bcolors.ENDC
+            print bcolors.OKGREEN + "Repeating last command:\t\t\t\t\t" + bcolors.OKBLUE + message + bcolors.ENDC
             communication.send_broadcast_message(c.PORT, message)
     # not repeating        
     else:
@@ -56,7 +56,7 @@ while True:
             string = identifier
             if string[0].lower() == 'a':
                 identifier = 'a'
-                string = string[1:0]
+                string = string[1:]
             elif not string[0].isdigit():
                 print bcolors.FAIL + 'First character must be digit!' + bcolors.ENDC
                 continue
@@ -68,12 +68,12 @@ while True:
                 string = string[1:]
             # mode command
             if string[0].lower() == 'm':
-                command = c.COMMAND_MODE
+                command = c.COMMAND_STATE
                 string = string[1:]
                 if 'd' in string.lower():
-                    value = c.VALUE_MODE_IDLE
+                    value = c.VALUE_STATE_IDLE
                 elif 'n' in string.lower():
-                    value = c.VALUE_MODE_INIT
+                    value = c.VALUE_STATE_INIT
                 else:
                     print bcolors.FAIL + "MODE NOT RECOGNIZED" + bcolors.ENDC
                     continue
@@ -91,6 +91,18 @@ while True:
                     except ValueError:
                         print bcolors.FAIL + 'VALUE NOT AN INTEGER \nrepeat!' + bcolors.ENDC
                         continue
+            elif string[0].lower() == 't':
+                command = c.COMMAND_TYPE
+                string = string[1:]
+                if 'c' in string.lower():
+                    value = c.VALUE_TYPE_COM
+                elif 'a' in string.lower():
+                    value = c.VALUE_TYPE_AUTO
+                elif 'i' in string.lower():
+                    value = c.VALUE_TYPE_IDLE
+                else:
+                    print bcolors.FAIL + "TYPE NOT RECOGNIZED" + bcolors.ENDC
+                    continue
             # blink command        
             elif string[0].lower() == 'b':
                 commmand = c.COMMAND_BLINK
@@ -117,7 +129,7 @@ while True:
                 continue
             
             # parsing command            
-            command = raw_input("Type command:\t(s)peed | (m)ode | (b)link\t")
+            command = raw_input("Type command:\t(s)peed | (t)ype | (m)ode | (b)link\t")
             command = command.lower()
             # mode change
             if command == 'm':                
@@ -126,9 +138,9 @@ while True:
                 value = raw_input("Type mode:\t i(d)le | i(n)it\t\t")
                 value = value.lower()
                 if value == 'd':
-                    value = c.VALUE_MODE_IDLE
+                    value = c.VALUE_STATE_IDLE
                 elif value == 'n':
-                    value = c.VALUE_MODE_INIT
+                    value = c.VALUE_STATE_INIT
                 else:
                     print bcolors.FAIL + "MODE NOT RECOGNIZED" + bcolors.ENDC
                     continue
@@ -136,7 +148,7 @@ while True:
             elif command == 's':                
                 command = c.COMMAND_SPEED
                 #parsing value
-                value = raw_input("Type absolute value OR \'+\' or \'-\'\t\t")
+                value = raw_input("Type absolute value OR \'+\' or \'-\'\t\t\t")
                 if value == '+':
                     value = c.VALUE_SPEED_INCREMENT
                 elif value == '-':
@@ -151,6 +163,19 @@ while True:
                         print 'VALUE NOT IN RANGE \nrepeat!'
                         continue
             # blink       
+            elif command == 't':
+                command = c.COMMAND_TYPE
+                value = raw_input("Type type:\t(c)omm | (a)uto | (i)dle\t\t").lower()
+                if value == 'c':
+                    value == c.VALUE_TYPE_COMM
+                elif value == 'a':
+                    value == c.VALUE_TYPE_AUTO
+                elif value == 'i':
+                    value == c.VALUE_TYPE_IDLE
+                else:
+                    print bcolors.FAIL + "TYPE NOT RECOGNIZED" + bcolors.ENDC
+                    continue
+                
             elif command == 'b':                
                 command = c.COMMAND_BLINK
                 value = ""
@@ -164,15 +189,14 @@ while True:
         if identifier == 'a':
             for identifier in range(c.TEAM_START, c.TEAM_END + 1):
                 target_ip = c.SUBNET_IP + identifier
-                message = identifier + " " + command + " " + value    
-                communication.send_udp_unicast_message(target_ip, c.PORT, message)
+                message = command + " " + value
+                communication.send_broadcast_message(c.PORT, message)
         # to one bot
         else:
             target_ip = c.SUBNET_IP + identifier
-            message = identifier + " " + command + " " + value    
-            print bcolors.OKGREEN +  'Sent message:\t\t\t\t\t' + bcolors.OKBLUE + message + bcolors.ENDC
-        
-        communication.send_udp_unicast_message(target_ip, c.PORT, message)
+            message = command + " " + value    
+            communication.send_udp_unicast_message(target_ip, c.PORT, message)
+        print bcolors.OKGREEN +  'Sent message:\t\t\t\t\t\t' + bcolors.OKBLUE + message + bcolors.ENDC
     
                 
             
