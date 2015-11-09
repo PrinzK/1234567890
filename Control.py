@@ -37,6 +37,8 @@ def stop_all_robots():
     
 def set_speed(robot, speed):
     pass
+
+
 print bcolors.UNDERLINE + "Either type command in form IDcommandvalue or one after the other. To repeat the last command, simply press 'r' and enter'\n" + bcolors.ENDC
 while True:
     print "_" * 100
@@ -54,6 +56,7 @@ while True:
             string = identifier
             if string[0].lower() == 'a':
                 identifier = 'a'
+                string = string[1:0]
             elif not string[0].isdigit():
                 print bcolors.FAIL + 'First character must be digit!' + bcolors.ENDC
                 continue
@@ -109,7 +112,7 @@ while True:
                 print bcolors.FAIL + 'VALUE NOT AN INTEGER \nrepeat!' + bcolors.ENDC
                 continue
                 
-            if c.SQUAD_START > int(identifier) or int(identifier) > c.SQUAD_END:
+            if c.TEAM_START > int(identifier) or int(identifier) > c.TEAM_END:
                 print bcolors.FAIL + "NO ROBOT WITH THIS ID IN SQUAD. \nrepeat!" + bcolors.ENDC
                 continue
             
@@ -133,7 +136,7 @@ while True:
             elif command == 's':                
                 command = c.COMMAND_SPEED
                 #parsing value
-                value = raw_input("Type absolute value OR \'+\' or \'-\'\t")
+                value = raw_input("Type absolute value OR \'+\' or \'-\'\t\t")
                 if value == '+':
                     value = c.VALUE_SPEED_INCREMENT
                 elif value == '-':
@@ -159,7 +162,7 @@ while True:
         # everything should be valid...
         # to all...
         if identifier == 'a':
-            for identifier in range(c.SQUAD_START, c.SQUAD_END + 1):
+            for identifier in range(c.TEAM_START, c.TEAM_END + 1):
                 target_ip = c.SUBNET_IP + identifier
                 message = identifier + " " + command + " " + value    
                 communication.send_udp_unicast_message(target_ip, c.PORT, message)

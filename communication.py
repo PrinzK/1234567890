@@ -46,6 +46,10 @@ def init_blocking_receiver(address, port, timeout):
 	sock = init_receiver(address, port)
 	sock.settimeout(timeout)
 	return sock
+ 
+def close_socket(sock):
+    sock.close()
+    print "Exiting clock_socket"
 
 
 def receive_message(sock):
