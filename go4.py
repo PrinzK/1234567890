@@ -31,6 +31,7 @@ flags = []
 flags.append(['set_motor',False])
 flags.append(['button_release',False])
 flags.append(['master_set_speed',False])
+flags.append(['masater_set_button',False])
 flags.append(['master_set_LED',False])
 
 

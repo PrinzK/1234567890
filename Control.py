@@ -35,7 +35,7 @@ def stop_all_robots():
     
 #get_modes()
     
-def set_speed(robot, speed):
+def set_numberof_com_bots(number_of_com_bots):
     pass
 
 
@@ -67,15 +67,15 @@ while True:
                 identifier = str('10' + string[0])
                 string = string[1:]
             # mode command
-            if string[0].lower() == 'm':
+            if string[0].lower() == 's':
                 command = c.COMMAND_STATE
                 string = string[1:]
-                if 'd' in string.lower():
+                if 'i' in string.lower():
                     value = c.VALUE_STATE_IDLE
-                elif 'n' in string.lower():
-                    value = c.VALUE_STATE_INIT
+                elif 'r' in string.lower():
+                    value = c.VALUE_STATE_RUNNING
                 else:
-                    print bcolors.FAIL + "MODE NOT RECOGNIZED" + bcolors.ENDC
+                    print bcolors.FAIL + "STATE NOT RECOGNIZED" + bcolors.ENDC
                     continue
             # speed commmand
             elif string[0].lower() == 's':
@@ -129,20 +129,20 @@ while True:
                 continue
             
             # parsing command            
-            command = raw_input("Type command:\t(s)peed | (t)ype | (m)ode | (b)link\t")
+            command = raw_input("Type command:\t(s)peed | (t)ype | st(a)te | (b)link\t")
             command = command.lower()
             # mode change
-            if command == 'm':                
-                command = c.COMMAND_MODE
+            if command == 'T':                
+                command = c.COMMAND_STATE
                 # parsing value
-                value = raw_input("Type mode:\t i(d)le | i(n)it\t\t")
+                value = raw_input("Type mode:\t (i)dle | (r)unning\t\t")
                 value = value.lower()
-                if value == 'd':
+                if value == 'i':
                     value = c.VALUE_STATE_IDLE
-                elif value == 'n':
-                    value = c.VALUE_STATE_INIT
+                elif value == 'r':
+                    value = c.VALUE_STATE_RUNNING
                 else:
-                    print bcolors.FAIL + "MODE NOT RECOGNIZED" + bcolors.ENDC
+                    print bcolors.FAIL + "STATE NOT RECOGNIZED" + bcolors.ENDC
                     continue
             # speed change
             elif command == 's':                

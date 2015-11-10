@@ -74,6 +74,7 @@ def start():
     flags.append(['set_motor',False])
     flags.append(['button_release',False])
     flags.append(['master_set_speed',False])
+    flags.append(['master_set_button',False])
     flags.append(['master_set_LED',False])    
     
     SPEED_RUN = c.SPEED_RUN
@@ -94,13 +95,14 @@ def start():
                 OWN_ID = com.get_id_from_ip(OWN_IP)
                 #print 'ID:' , OWN_ID
                 prev_state = state
-                #state = 'IDLE'
-                state = 'RUNNING'
+                state = 'IDLE'
+                #state = 'RUNNING'
     
     
             if state == 'IDLE':
+                com.send_x_broadcast_messages(c.PORT, "RELEASE", c.SENDING_ATTEMPTS, c.WAIT_SEND)
                 if prev_state != 'IDLE':
-                    pi2go.setAllLEDs(c.LED_OFF,c.LED_OFF,c.LED_OFF)
+                    pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_OFF)
                     pi2go.stop()
                 if check_time_limit(times,'prev_get_switch',c.WAIT_SWITCH):
                     # Pressed = 1, Released = 0
@@ -111,9 +113,48 @@ def start():
                         set_element(flags,'button_release',False)
                         prev_state = state
                         state = 'RUNNING'
-                        set_element(flags,'master_set_speed',True)
+                        set_element(flags,'master_set_button',True)
                         set_element(flags,'master_set_LED',True)
-                        
+                # change to sensor-based or master_idle type        
+                data = 'new_round'
+                while data != '':
+                    data, addr = com.receive_message(sock) 
+                    if data != '':
+                        sender_ID = com.get_id_from_ip(addr[0])
+                        if sender_ID == OWN_ID:
+                            #print 'OWN: ' , ID, ' : ' , data
+                            continue
+                        if sender_ID >= c.TEAM_START and sender_ID <= c.TEAM_END:
+                            #print 'ROBOT: ', ID, ' : ' , data
+                            if data == 'PROBLEM':
+                                curr_status = False
+                                warning[sender_ID-c.TEAM_START] = curr_status
+                            elif data == 'RELEASE':
+                                curr_status = True
+                                warning[sender_ID-c.TEAM_START] = curr_status
+                        else:
+                            #print 'MASTER:' , ID , ' : ' , data
+                            command, value = com.string_to_command(data)
+                            # change MODE, STATUS, SPEED, DISTANCELIMITS#
+                                #print 'MasterID: ', ID , 'PARAM: ' , PARAM , 'VALUE: ' , VALUE
+                            if command == c.COMMAND_SPEED:
+                                set_element(flags,'master_set_speed',True)
+                                prev_SPEED_RUN = SPEED_RUN
+                                if value == '+':
+                                    SPEED_RUN += 5
+                                elif value == '-':
+                                    SPEED_RUN -= 5
+                                else:
+                                    SPEED_RUN = value
+                                print 'Set SPEED_RUN from '+ str(prev_SPEED_RUN) + ' to ' + str(SPEED_RUN)           
+                            elif command == c.COMMAND_DIST:
+                                prev_DIST_MIN = DIST_MIN
+                                DIST_MIN = value
+                               # print 'Set DIST_MIN from '+ str(prev_DIST_MIN) + ' to ' + str(DIST_MIN)           
+                            elif command == c.COMMAND_STATE:    
+                                print 'master want to change MODE'
+                            elif command == c.COMMAND_TYPE:
+                                return value
                     
     
             elif state == 'RUNNING':
@@ -180,6 +221,10 @@ def start():
                                         
                 # Analyse --> Calculate MODE
                 prev_mode = mode
+                # overwrite for coming from idle state
+                if get_element(flags, 'master_set_button'):
+                    prev_mode = ''
+                    
                 if distance_level == 0:
                     mode = 'STOP'
                 elif distance_level == 1 and all(warning):
@@ -277,9 +322,9 @@ def start():
                 # Send
                 if mode != prev_mode:                          
                     if prev_mode == 'STOP':
-                        send_new_status('RELEASE',c.SENDING_ATTEMPTS,c.WAIT_SEND)                 
+                        com.send_x_broadcast_messages(c.PORT, "RELEASE", c.SENDING_ATTEMPTS, c.WAIT_SEND)
                     elif mode == 'STOP':
-                        send_new_status('PROBLEM',c.SENDING_ATTEMPTS,c.WAIT_SEND) 
+                        com.send_x_broadcast_messages(c.PORT, "PROBLEM", c.SENDING_ATTEMPTS, c.WAIT_SEND)
     
     
                 # Button

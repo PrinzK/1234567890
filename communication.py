@@ -3,6 +3,7 @@
 import socket
 import subprocess
 import constants as c
+import time
 
 
 def send_broadcast_message(port, message):
@@ -17,6 +18,12 @@ def send_broadcast_message(port, message):
 		return "Error while sending!"
 	finally:
 		sock.close()
+  
+def send_x_broadcast_messages(port, message, x, time_between):
+    for iteration in range(x):
+        send_broadcast_message(port, message)
+        time.sleep(time_between)
+        
 
 
 def send_udp_unicast_message(address, port, message):
