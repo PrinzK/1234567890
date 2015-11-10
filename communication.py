@@ -3,6 +3,7 @@
 import socket
 import subprocess
 import constants as c
+import time
 
 
 def send_broadcast_message(port, message):
@@ -17,6 +18,12 @@ def send_broadcast_message(port, message):
 		return "Error while sending!"
 	finally:
 		sock.close()
+  
+def send_x_broadcast_messages(port, message, x, time_between):
+    for iteration in range(x):
+        send_broadcast_message(port, message)
+        time.sleep(time_between)
+        
 
 
 def send_udp_unicast_message(address, port, message):
@@ -93,7 +100,10 @@ def get_id():
 def string_to_command(data):
     strings = data.split(' ')
     command = strings[0]
-    value = strings[1]
-    if command == c.COMMAND_SPEED and value.isdigit():
+    if len(strings) > 1:
+        value = strings[1]
+    else:
+        value = ''
+    if command == c.COMMAND_SPEED and value.isdigit() or command == c.COMMAND_DIST:
         value = int(value)
     return (command,value)
