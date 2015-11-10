@@ -5,12 +5,11 @@ Created on Mon Nov  9 18:11:32 2015
 @author: david
 """
 
+
 import time
 import communication as com
 import pi2go
 import constants as c
-# Initail Values
-
 
 
 def find_element(list_2D,element):
@@ -25,8 +24,7 @@ def find_element(list_2D,element):
 
 def get_element(list_2D,element):
     row = find_element(list_2D,element)
-    value = list_2D[row][1]
-    return value
+    return list_2D[row][1]
     
     
 def set_element(list_2D,element,value):
@@ -42,10 +40,6 @@ def check_time_limit(list_2D,element,limit):
     else:
         return False
 
-def send_new_status(msg,repetitions,space):
-    for x in range(repetitions):
-        com.send_broadcast_message(c.PORT, msg)
-        time.sleep(space)  
         
 def blink(color = 'white', sleeptime=0.1):
     if color == 'white':
@@ -80,9 +74,9 @@ def blink(color = 'white', sleeptime=0.1):
     time.sleep(sleeptime)
     pi2go.setAllLEDs(c.LED_OFF, c.LED_OFF, c.LED_OFF)
 
+
 def determine_team(OWN_ID): 
     if OWN_ID - c.TEAM_START < c.COM_TEAM_SIZE:
         return c.VALUE_TYPE_COM
     else:
         return c.VALUE_TYPE_AUTO
-    

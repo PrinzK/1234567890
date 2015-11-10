@@ -15,7 +15,7 @@ OWN_ID = com.get_id_from_ip(OWN_IP)
 if OWN_ID - c.TEAM_START < c.COM_TEAM_SIZE:
     value = c.VALUE_TYPE_COM
 else:
-    VALUE = c.VALUE_TYPE_AUTO
+    value = c.VALUE_TYPE_AUTO
 
 try:
     

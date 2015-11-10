@@ -18,12 +18,12 @@ def send_broadcast_message(port, message):
 		return "Error while sending!"
 	finally:
 		sock.close()
+
   
 def send_x_broadcast_messages(port, message, x, time_between):
     for iteration in range(x):
         send_broadcast_message(port, message)
-        time.sleep(time_between)
-        
+        time.sleep(time_between)   
 
 
 def send_udp_unicast_message(address, port, message):
@@ -83,8 +83,7 @@ def receive_message_list(sock):
 
 def get_ip():
 	ip = subprocess.check_output(['hostname', '-I'])
- 	ip = ip[:-2]
-	return ip
+	return ip[:-2]
 
 
 def get_id_from_ip(ip_addr):
@@ -93,8 +92,7 @@ def get_id_from_ip(ip_addr):
 
 def get_id():
 	ip = get_ip()
-   	identifier = get_id_from_ip(ip)
-	return identifier
+	return get_id_from_ip(ip)
  
 
 def string_to_command(data):
