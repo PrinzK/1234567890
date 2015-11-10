@@ -20,19 +20,21 @@ prev_mode = ''
 speed = 0
 distance = 0
 warning = []
+last_time = 0
 
 times = []
 times.append(['prev_get_dist',0.0])
 times.append(['prev_get_switch',0.0])
 times.append(['prev_set_motor',0.0])
 times.append(['get_warning',0.0])
+times.append(['prev_set_LED',0.0])
       
 flags = []
 flags.append(['set_motor',False])
 flags.append(['button_release',False])
 flags.append(['master_set_speed',False])
 flags.append(['master_set_LED',False])
-
+flags.append(['status_warn_LED',False])
 
 def find_element(list_2D,element):
     for x in range(len(list_2D)):
@@ -71,6 +73,7 @@ def send_new_status(msg,repetitions,space):
     
 # Parameters
 SPEED_RUN = c.SPEED_RUN
+SPEED_MIN = 20
 SPEED_WARN = c.SPEED_WARN
 SPEED_CONTROL_MAX = c.SPEED_CONTROL_MAX
 SPEED_CONTROL_MIN = c.SPEED_STOP
@@ -111,10 +114,12 @@ try:
                 
 
         elif state == 'RUNNING':
-            # Distance         
+            # Distance
             if check_time_limit(times,'prev_get_dist',c.WAIT_DIST):
                 distance = pi2go.getDistance()
-                print distance
+                time_between = time.time() - last_time
+                print 'dt:', time_between , distance
+                last_time = time.time()
             
             # Obstacle = 1, No Obstacle = 0
             irCentre = pi2go.irCentre()
@@ -122,7 +127,7 @@ try:
             # Obstacle Analysis
             if irCentre or (distance < DIST_MIN):
                 distance_level = 0
-            elif distance > c.DIST_REF:
+            elif distance > c.DIST_MAX:
                 distance_level = 2
             else:
                 distance_level = 1
@@ -135,18 +140,16 @@ try:
                 if data != '':
                     sender_ID = com.get_id_from_ip(addr[0])
                     if sender_ID == OWN_ID:
-                        #print 'OWN: ' , ID, ' : ' , data
+                        #print 'OWN: ' , sender_ID, ' : ' , data
                         continue
                     if sender_ID >= c.TEAM_START and sender_ID <= c.TEAM_END:
-                        #print 'ROBOT: ', ID, ' : ' , data
+                        print 'ROBOT: ', sender_ID, ' : ' , data , sender_ID-c.TEAM_START
                         if data == 'PROBLEM':
-                            curr_status = False
-                            warning[sender_ID-c.TEAM_START] = curr_status
+                            warning[sender_ID-c.TEAM_START] = False
                         elif data == 'RELEASE':
-                            curr_status = True
-                            warning[sender_ID-c.TEAM_START] = curr_status
+                            warning[sender_ID-c.TEAM_START] = True
                     else:
-                        #print 'MASTER:' , ID , ' : ' , data
+                        print 'MASTER:' , sender_ID , ' : ' , data
                         sender_ID, PARAM, VALUE = com.string_to_command(data)
                         if sender_ID == OWN_ID:
                             #print 'MasterID: ', ID , 'PARAM: ' , PARAM , 'VALUE: ' , VALUE
@@ -167,10 +170,11 @@ try:
                             elif PARAM == 'mode':    
                                 print 'master want to change MODE'
                         # change MODE, STATUS, SPEED, DISTANCELIMITS#
-
+                #print warning
                                     
             # Analyse --> Calculate MODE
-            prev_mode = mode
+            if prev_state == 'RUNNING':                
+                prev_mode = mode
             if distance_level == 0:
                 mode = 'STOP'
             elif distance_level == 1 and all(warning):
@@ -184,12 +188,11 @@ try:
                 break
 
             
-            # Set own Warning-Flag 
-            if mode != prev_mode:                          
-                if mode == 'STOP':
-                    warning[OWN_ID-c.TEAM_START] = False
-                else:
-                    warning[OWN_ID-c.TEAM_START] = True
+            # Set own Warning-Flag                           
+            if mode == 'STOP':
+                warning[OWN_ID-c.TEAM_START] = False
+            else:
+                warning[OWN_ID-c.TEAM_START] = True
 
 
             # LEDs  
@@ -200,12 +203,22 @@ try:
                     pi2go.setAllLEDs(c.LED_OFF,c.LED_ON,c.LED_OFF)
                 elif mode == 'SLOW':
                     pi2go.setAllLEDs(c.LED_OFF,c.LED_OFF,c.LED_ON)
-                elif mode == 'WARN':
-                    pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_OFF)
+                #elif mode == 'WARN':
+                    #pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_OFF)
                 elif mode == 'STOP':
-                    pi2go.setAllLEDs(c.LED_ON,c.LED_OFF,c.LED_OFF)
+                   pi2go.setAllLEDs(c.LED_ON,c.LED_OFF,c.LED_OFF)
+            # Blinking-Mode
+            if mode == 'WARN':
+                if check_time_limit(times,'prev_set_LED',c.WAIT_LED):
+                    if get_element(flags,'status_warn_LED'):
+                        pi2go.setAllLEDs(c.LED_OFF,c.LED_OFF,c.LED_OFF)
+                        set_element(flags,'status_warn_LED',False)
+                    else:
+                        pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_OFF)
+                        set_element(flags,'status_warn_LED',True)
+                        
+                
 
-                    
             # Calculate new speed
             if mode == 'RUN':
                 if prev_mode != 'RUN' or get_element(flags,'master_set_speed'):
@@ -215,12 +228,13 @@ try:
             
             # Blocking Avoidance
             elif mode == 'SLOW':
-                KP = float(SPEED_CONTROL_MAX - SPEED_CONTROL_MIN)/float(c.DIST_REF-DIST_MIN)
-                error = c.DIST_REF - distance
-                new_value = round(SPEED_RUN - error * KP,1)
+                #linear
+                gradient = float(SPEED_RUN - SPEED_MIN)/float(c.DIST_MAX-DIST_MIN)
+                error = c.DIST_MAX - distance
+                new_value = round(SPEED_RUN - error * gradient,1)               
                 
-                if new_value < SPEED_CONTROL_MIN:
-                    new_value = SPEED_CONTROL_MIN
+                if new_value < SPEED_MIN:
+                    new_value = SPEED_MIN
                 elif new_value > c.SPEED_CONTROL_MAX:
                     new_value = c.SPEED_CONTROL_MAX
                                  
@@ -247,10 +261,10 @@ try:
                 if prev_mode != 'STOP':
                     speed = c.SPEED_STOP
                     set_element(flags,'set_motor',True)
-  
+
+            #print 'mode: ', mode , 'speed: ', speed , 'dist: ' , distance
             
             # Motor
-            #print 'mode: ', mode , 'speed: ', speed , 'dist: ' , distance
             if get_element(flags,'set_motor'):
                 if speed > c.SPEED_MAX:
                     speed = c.SPEED_MAX
@@ -271,7 +285,8 @@ try:
                     send_new_status('RELEASE',c.SENDING_ATTEMPTS,c.WAIT_SEND)                 
                 elif mode == 'STOP':
                     send_new_status('PROBLEM',c.SENDING_ATTEMPTS,c.WAIT_SEND) 
-
+            
+            prev_state = state
 
             # Button
             if check_time_limit(times,'prev_get_switch',c.WAIT_SWITCH):
@@ -284,6 +299,7 @@ try:
                     prev_state = state
                     #state = 'IDLE'
                     state = 'RUNNING'
+
 
         
         else:
