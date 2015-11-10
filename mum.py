@@ -1,19 +1,21 @@
 import communication as com
-import comm_bot
+import com_bot
 import auto_bot
 import constants as c
 import helpers
 
 
 
-
+helpers.blink()
 #sock = com.init_receiver('', c.PORT)
 
 OWN_IP = com.get_ip()
 OWN_ID = com.get_id_from_ip(OWN_IP)
-helpers.blink()
-if OWN_ID - c.TEAM_START < c.COMM_TEAM_SIZE:
+
+if OWN_ID - c.TEAM_START < c.COM_TEAM_SIZE:
     value = c.VALUE_TYPE_COM
+else:
+    VALUE = c.VALUE_TYPE_AUTO
 
 try:
     
@@ -25,7 +27,7 @@ try:
             status = "I'm in com_mode now!"            
             print status
             #communication.send_broadcast_message(c.PORT, status)  
-            value = comm_bot.start()            
+            value = com_bot.start()            
             status = "Exiting com_mode"
             com.send_x_broadcast_messages(c.PORT, "RELEASE", c.SENDING_ATTEMPTS, c.WAIT_SEND)
             print status
@@ -44,10 +46,7 @@ try:
             #communication.send_broadcast_message(PORT, status)
             sock = com.init_receiver('', c.PORT)
             data, addr = com.receive_message(sock)
-            try:
-                command, value = com.string_to_command(data)
-            except:
-                command = ''
+            command, value = com.string_to_command(data)
             if command != c.COMMAND_TYPE:
                 value = c.VALUE_TYPE_IDLE
             com.close_socket(sock)

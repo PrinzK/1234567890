@@ -1,4 +1,4 @@
-import communication
+import communication as com
 import constants as c
 
 class bcolors:
@@ -10,10 +10,7 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
-
-sock = communication.init_nonblocking_receiver('', c.PORT)
-message = ''
-
+"""
 def get_modes():
     state_list = []
     for x in range (0,15):
@@ -22,7 +19,6 @@ def get_modes():
     state_list = communication.update_state_list(state_list, message_list)
     print state_list
 		
-
 def start_comm_bots():
     for identifier in range(c.SQUAD_START, c.SQUAD_END):
         communication.send_x_broadcast_messages(c.PORT, c.GO_COMM, c.SENDING_ATTEMPTS)
@@ -37,26 +33,33 @@ def stop_all_robots():
     
 def set_numberof_com_bots(number_of_com_bots):
     pass
-
-
+"""
+message = ''
+last_recipient = ''
 print bcolors.UNDERLINE + "Either type command in form IDcommandvalue or one after the other. To repeat the last command, simply press 'r' and enter'\n" + bcolors.ENDC
 while True:
     print "_" * 100
-    identifier = raw_input('ID ([0:11] or \'a\') or whole command: \t\t\t')
+    identifier = raw_input('ID ([0:11] or (al)l | (co)m_bots | (au)to  or whole command: \t')
     if identifier == 'r':
         if message == '':
             print bcolors.FAIL + 'No message sent so far!' + bcolors.ENDC
         else:
-            print bcolors.OKGREEN + "Repeating last command:\t\t\t\t\t" + bcolors.OKBLUE + message + bcolors.ENDC
-            communication.send_broadcast_message(c.PORT, message)
+            print bcolors.BOLD + "Repeating last command:\t" + bcolors.ENDC + bcolors.OKGREEN +  '\tTo:\t' + last_recipient + bcolors.OKBLUE + "\tsent message:\t" + message + bcolors.ENDC
+            com.send_broadcast_message(c.PORT, message)
     # not repeating        
     else:
         # one-input mode
         if len(identifier) > 2:
             string = identifier
-            if string[0].lower() == 'a':
-                identifier = 'a'
-                string = string[1:]
+            if string[0:2].lower() == 'al':
+                identifier = 'all'
+                string = string[2:]
+            elif string[0:2].lower() == 'co':
+                identifier = 'com_bots'
+                string = string[2:]
+            elif string[0:2].lower() == 'au':
+                identifier = 'auto_bots'
+                string = string[2:]
             elif not string[0].isdigit():
                 print bcolors.FAIL + 'First character must be digit!' + bcolors.ENDC
                 continue
@@ -67,7 +70,7 @@ while True:
                 identifier = str('10' + string[0])
                 string = string[1:]
             # mode command
-            if string[0].lower() == 's':
+            if string[0].lower() == 'a':
                 command = c.COMMAND_STATE
                 string = string[1:]
                 if 'i' in string.lower():
@@ -94,14 +97,22 @@ while True:
             elif string[0].lower() == 't':
                 command = c.COMMAND_TYPE
                 string = string[1:]
-                if 'c' in string.lower():
+                if 'co' in string.lower():
                     value = c.VALUE_TYPE_COM
-                elif 'a' in string.lower():
+                elif 'au' in string.lower():
                     value = c.VALUE_TYPE_AUTO
                 elif 'i' in string.lower():
                     value = c.VALUE_TYPE_IDLE
+                elif 'o' in string.lower():
+                    value = c.VALUE_TYPE_ORIGINAL
                 else:
                     print bcolors.FAIL + "TYPE NOT RECOGNIZED" + bcolors.ENDC
+                    continue
+            elif string[0].lower() == 'd':
+                command = c.COMMAND_DIST
+                value = string[1:0]
+                if not value.isdigit():
+                    bcolors.FAIL + 'VALUE NOT AN INTEGER \nrepeat!' + bcolors.ENDC
                     continue
             # blink command        
             elif string[0].lower() == 'b':
@@ -113,29 +124,36 @@ while True:
                 
         # sequential input mode
         else:
+            if identifier.lower() == 'al':
+                identifier = 'all'
+            elif identifier.lower() == 'au':
+                identifier = 'auto_bots'
+            elif identifier.lower() == 'co':
+                identifier = 'com_bots'
             # parsing identififer
-            if len(identifier) == 1:
-                identifier = '0' + identifier
-            identifier = '1' + identifier
-            #print 'Talking to robot with id ' + identifier
-            try: 
-                int(identifier)
-            except ValueError:
-                print bcolors.FAIL + 'VALUE NOT AN INTEGER \nrepeat!' + bcolors.ENDC
-                continue
-                
-            if c.TEAM_START > int(identifier) or int(identifier) > c.TEAM_END:
-                print bcolors.FAIL + "NO ROBOT WITH THIS ID IN SQUAD. \nrepeat!" + bcolors.ENDC
-                continue
+            else:
+                if len(identifier) == 1:
+                    identifier = '0' + identifier
+                identifier = '1' + identifier
+                #print 'Talking to robot with id ' + identifier
+                try: 
+                    int(identifier)
+                except ValueError:
+                    print bcolors.FAIL + 'VALUE NOT AN INTEGER \nrepeat!' + bcolors.ENDC
+                    continue
+                    
+                if c.TEAM_START > int(identifier) or int(identifier) > c.TEAM_END:
+                    print bcolors.FAIL + "NO ROBOT WITH THIS ID IN SQUAD. \nrepeat!" + bcolors.ENDC
+                    continue
             
             # parsing command            
-            command = raw_input("Type command:\t(s)peed | (t)ype | st(a)te | (b)link\t")
+            command = raw_input("Type command:\t(s)peed | (t)ype | st(a)te | (b)link | (d)ist\t")
             command = command.lower()
             # mode change
-            if command == 'T':                
+            if command == 'a':                
                 command = c.COMMAND_STATE
                 # parsing value
-                value = raw_input("Type mode:\t (i)dle | (r)unning\t\t")
+                value = raw_input("Type state:\t (i)dle | (r)unning\t\t")
                 value = value.lower()
                 if value == 'i':
                     value = c.VALUE_STATE_IDLE
@@ -148,7 +166,7 @@ while True:
             elif command == 's':                
                 command = c.COMMAND_SPEED
                 #parsing value
-                value = raw_input("Type absolute value OR \'+\' or \'-\'\t\t\t")
+                value = raw_input("Type absolute value OR \'+\' or \'-\'\t\t\t\t")
                 if value == '+':
                     value = c.VALUE_SPEED_INCREMENT
                 elif value == '-':
@@ -165,17 +183,23 @@ while True:
             # blink       
             elif command == 't':
                 command = c.COMMAND_TYPE
-                value = raw_input("Type type:\t(c)omm | (a)uto | (i)dle\t\t").lower()
-                if value == 'c':
-                    value == c.VALUE_TYPE_COMM
-                elif value == 'a':
-                    value == c.VALUE_TYPE_AUTO
+                value = raw_input("Type type:\t(co)m | (au)to | (i)dle | (o)riginal\t\t").lower()
+                if value == 'co':
+                    value = c.VALUE_TYPE_COM
+                elif value == 'au':
+                    value = c.VALUE_TYPE_AUTO
                 elif value == 'i':
-                    value == c.VALUE_TYPE_IDLE
+                    value = c.VALUE_TYPE_IDLE
+                elif value == 'o':
+                    value = c.VALUE_TYPE_ORIGINAL
                 else:
                     print bcolors.FAIL + "TYPE NOT RECOGNIZED" + bcolors.ENDC
                     continue
-                
+            elif command == 'd':
+                command = c.COMMAND_DIST
+                value = raw_input("Type new MIN_DIST:\t\t\t\t\t\t")
+                if not value.isdigit():
+                    print bcolors.FAIL + "NOT AN INTEGER" + bcolors.ENDC
             elif command == 'b':                
                 command = c.COMMAND_BLINK
                 value = ""
@@ -186,18 +210,27 @@ while True:
                 continue
         # everything should be valid...
         # to all...
-        if identifier == 'a':
-            for identifier in range(c.TEAM_START, c.TEAM_END + 1):
-                target_ip = c.SUBNET_IP + identifier
-                message = command + " " + value
-                communication.send_broadcast_message(c.PORT, message)
+        if identifier == 'all':
+            message = command + " " + value
+            com.send_broadcast_message(c.PORT, message)
         # to one bot
+        elif identifier == 'com_bots':
+            message = command + " " + value
+            for x in range(c.TEAM_START, c.TEAM_START + c.COM_TEAM_SIZE):                
+                target_ip = c.SUBNET_IP + str(x)
+                com.send_udp_unicast_message(target_ip, c.PORT, message)
+                
+        elif identifier == 'auto_bots':
+            message = command + " " + value
+            for x in range(c.TEAM_START + c.COM_TEAM_SIZE, c.TEAM_END):
+                target_ip = c.SUBNET_IP + str(x)
+                com.send_udp_unicast_message(target_ip, c.PORT, message)
         else:
             target_ip = c.SUBNET_IP + identifier
             message = command + " " + value    
-            communication.send_udp_unicast_message(target_ip, c.PORT, message)
-        print bcolors.OKGREEN +  'Sent message:\t\t\t\t\t\t' + bcolors.OKBLUE + message + bcolors.ENDC
-    
+            com.send_udp_unicast_message(target_ip, c.PORT, message)
+        print bcolors.OKGREEN +  '\t\t\t\tTo:\t' + identifier + bcolors.OKBLUE +"\tsent message:\t" + message + bcolors.ENDC
+        last_recipient = identifier
                 
             
     

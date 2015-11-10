@@ -10,6 +10,7 @@ import communication as com
 import constants as c
 import pi2go
 import time
+import helper
 
 # Initail Values
 
@@ -100,7 +101,6 @@ def start():
     
     
             if state == 'IDLE':
-                com.send_x_broadcast_messages(c.PORT, "RELEASE", c.SENDING_ATTEMPTS, c.WAIT_SEND)
                 if prev_state != 'IDLE':
                     pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_OFF)
                     pi2go.stop()
@@ -150,10 +150,18 @@ def start():
                             elif command == c.COMMAND_DIST:
                                 prev_DIST_MIN = DIST_MIN
                                 DIST_MIN = value
-                               # print 'Set DIST_MIN from '+ str(prev_DIST_MIN) + ' to ' + str(DIST_MIN)           
+                               # print 'Set DIST_MIN from '+ str(prev_DIST_MIN) + ' to ' + str(DIST_MIN)  
+                            elif command == c.COMMAND_BLINK:
+                                helper.blink('white')
+                                set_element(flags, 'master_set_LED', True)
                             elif command == c.COMMAND_STATE:    
-                                print 'master want to change MODE'
+                                if value == c.VALUE_STATE_RUNNING:
+                                    state = 'RUNNING'
+                                elif value == c.VALUE_STATE_IDLE:
+                                    state = 'IDLE'
                             elif command == c.COMMAND_TYPE:
+                                if value == c.VALUE_TYPE_ORIGINAL:
+                                    value = helper.determine_team(OWN_ID)
                                 return value
                     
     
@@ -209,11 +217,24 @@ def start():
                                 print 'Set SPEED_RUN from '+ str(prev_SPEED_RUN) + ' to ' + str(SPEED_RUN)           
                             elif command == c.COMMAND_DIST:
                                 prev_DIST_MIN = DIST_MIN
+                                if not value.isdigit():
+                                    print "Something went terribly wrong with the protocol..."
+                                    raise KeyboardInterrupt
                                 DIST_MIN = value
+                            elif command == c.COMMAND_BLINK:
+                                helper.blink('white')
+                                set_element(flags, 'master_set_LED', True)
                                # print 'Set DIST_MIN from '+ str(prev_DIST_MIN) + ' to ' + str(DIST_MIN)           
                             elif command == c.COMMAND_STATE:    
-                                print 'master want to change MODE'
+                                if value == c.VALUE_STATE_RUNNING:
+                                    state = 'RUNNING'
+                                elif value == c.VALUE_STATE_IDLE:
+                                    state = 'IDLE'
+                            #elif command == c.COMMAND_TYPE and value != c.VALUE_TYPE_COM:
                             elif command == c.COMMAND_TYPE:
+                                if value == c.VALUE_TYPE_ORIGINAL:
+                                    value = helper.determine_team(OWN_ID)
+                                print "com_bot.py says: changing to", value
                                 return value
                                 
                         
@@ -337,6 +358,7 @@ def start():
                         set_element(flags,'button_release',False)
                         prev_state = state
                         state = 'IDLE'
+                        com.send_x_broadcast_messages(c.PORT, "RELEASE", c.SENDING_ATTEMPTS, c.WAIT_SEND)
                         #state = 'RUNNING'
     
             

@@ -47,7 +47,7 @@ def send_new_status(msg,repetitions,space):
         com.send_broadcast_message(c.PORT, msg)
         time.sleep(space)  
         
-def blink(color = 'white'):
+def blink(color = 'white', sleeptime=0.1):
     if color == 'white':
         red = c.LED_ON
         green = c.LED_ON
@@ -73,9 +73,16 @@ def blink(color = 'white'):
         green = c.LED_ON
         blue = c.LED_ON    
     pi2go.setAllLEDs(red, green, blue)
-    time.sleep(0.1)
+    time.sleep(sleeptime)
     pi2go.setAllLEDs(c.LED_OFF, c.LED_OFF, c.LED_OFF)
-    time.sleep(0.1)
+    time.sleep(sleeptime)
     pi2go.setAllLEDs(red, green, blue)
-    time.sleep(0.1)
+    time.sleep(sleeptime)
     pi2go.setAllLEDs(c.LED_OFF, c.LED_OFF, c.LED_OFF)
+
+def determine_team(OWN_ID): 
+    if OWN_ID - c.TEAM_START < c.COM_TEAM_SIZE:
+        return c.VALUE_TYPE_COM
+    else:
+        return c.VALUE_TYPE_AUTO
+    

@@ -100,7 +100,10 @@ def get_id():
 def string_to_command(data):
     strings = data.split(' ')
     command = strings[0]
-    value = strings[1]
-    if command == c.COMMAND_SPEED and value.isdigit():
+    if len(strings) > 1:
+        value = strings[1]
+    else:
+        value = ''
+    if command == c.COMMAND_SPEED and value.isdigit() or command == c.COMMAND_DIST:
         value = int(value)
     return (command,value)
