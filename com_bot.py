@@ -137,32 +137,45 @@ def start():
                             command, value = com.string_to_command(data)
                             # change MODE, STATUS, SPEED, DISTANCELIMITS#
                                 #print 'MasterID: ', ID , 'PARAM: ' , PARAM , 'VALUE: ' , VALUE
-                            if command == c.COMMAND_SPEED:
-                                set_element(flags,'master_set_speed',True)
-                                prev_SPEED_RUN = SPEED_RUN
-                                if value == '+':
-                                    SPEED_RUN += 5
-                                elif value == '-':
-                                    SPEED_RUN -= 5
-                                else:
-                                    SPEED_RUN = value
-                                print 'Set SPEED_RUN from '+ str(prev_SPEED_RUN) + ' to ' + str(SPEED_RUN)           
-                            elif command == c.COMMAND_DIST:
-                                prev_DIST_MIN = DIST_MIN
-                                DIST_MIN = value
-                               # print 'Set DIST_MIN from '+ str(prev_DIST_MIN) + ' to ' + str(DIST_MIN)  
-                            elif command == c.COMMAND_BLINK:
-                                helper.blink('white')
-                                set_element(flags, 'master_set_LED', True)
-                            elif command == c.COMMAND_STATE:    
-                                if value == c.VALUE_STATE_RUNNING:
-                                    state = 'RUNNING'
-                                elif value == c.VALUE_STATE_IDLE:
-                                    state = 'IDLE'
-                            elif command == c.COMMAND_TYPE:
-                                if value == c.VALUE_TYPE_ORIGINAL:
-                                    value = helper.determine_team(OWN_ID)
-                                return value
+                            try:
+                                if command == c.COMMAND_SPEED:
+                                    set_element(flags,'master_set_speed',True)
+                                    prev_SPEED_RUN = SPEED_RUN
+                                    if value == '+':
+                                        SPEED_RUN += 5
+                                    elif value == '-':
+                                        SPEED_RUN -= 5
+                                    else:
+                                        SPEED_RUN = value
+                                    print 'Set SPEED_RUN from '+ str(prev_SPEED_RUN) + ' to ' + str(SPEED_RUN)           
+                                elif command == c.COMMAND_DIST:
+                                    prev_DIST_MIN = DIST_MIN
+                                    DIST_MIN = value
+                                   # print 'Set DIST_MIN from '+ str(prev_DIST_MIN) + ' to ' + str(DIST_MIN)  
+                                elif command == c.COMMAND_BLINK:
+                                    helper.blink('white')
+                                    set_element(flags, 'master_set_LED', True)
+                                elif command == c.COMMAND_RESET:    
+                                    SPEED_RUN = c.SPEED_RUN
+                                    SPEED_WARN = c.SPEED_WARN
+                                    SPEED_CONTROL_MAX = c.SPEED_CONTROL_MAX
+                                    SPEED_CONTROL_MIN = c.SPEED_STOP
+                                    DIST_MIN = c.DIST_MIN
+                                    set_element(times,'prev_get_dist',0)
+                                    set_element(flags,'master_set_LED', True)
+                                    set_element(flags,'master_set_speed', True)
+                                    warning = True * len(warning)
+                                elif command == c.COMMAND_STATE:    
+                                    if value == c.VALUE_STATE_RUNNING:
+                                        state = 'RUNNING'
+                                    elif value == c.VALUE_STATE_IDLE:
+                                        state = 'IDLE'
+                                elif command == c.COMMAND_TYPE:
+                                    if value == c.VALUE_TYPE_ORIGINAL:
+                                        value = helper.determine_team(OWN_ID)
+                                    return value
+                            except:
+                                print "Error interpreting message from master! Continuing anyway"
                     
     
             elif state == 'RUNNING':
@@ -201,42 +214,54 @@ def start():
                                 curr_status = True
                                 warning[sender_ID-c.TEAM_START] = curr_status
                         else:
+                            try:
                             #print 'MASTER:' , ID , ' : ' , data
-                            command, value = com.string_to_command(data)
-                            # change MODE, STATUS, SPEED, DISTANCELIMITS#
-                                #print 'MasterID: ', ID , 'PARAM: ' , PARAM , 'VALUE: ' , VALUE
-                            if command == c.COMMAND_SPEED:
-                                set_element(flags,'master_set_speed',True)
-                                prev_SPEED_RUN = SPEED_RUN
-                                if value == '+':
-                                    SPEED_RUN += 5
-                                elif value == '-':
-                                    SPEED_RUN -= 5
-                                else:
-                                    SPEED_RUN = value
-                                print 'Set SPEED_RUN from '+ str(prev_SPEED_RUN) + ' to ' + str(SPEED_RUN)           
-                            elif command == c.COMMAND_DIST:
-                                prev_DIST_MIN = DIST_MIN
-                                if not value.isdigit():
-                                    print "Something went terribly wrong with the protocol..."
-                                    raise KeyboardInterrupt
-                                DIST_MIN = value
-                            elif command == c.COMMAND_BLINK:
-                                helper.blink('white')
-                                set_element(flags, 'master_set_LED', True)
-                               # print 'Set DIST_MIN from '+ str(prev_DIST_MIN) + ' to ' + str(DIST_MIN)           
-                            elif command == c.COMMAND_STATE:    
-                                if value == c.VALUE_STATE_RUNNING:
-                                    state = 'RUNNING'
-                                elif value == c.VALUE_STATE_IDLE:
-                                    state = 'IDLE'
-                            #elif command == c.COMMAND_TYPE and value != c.VALUE_TYPE_COM:
-                            elif command == c.COMMAND_TYPE:
-                                if value == c.VALUE_TYPE_ORIGINAL:
-                                    value = helper.determine_team(OWN_ID)
-                                print "com_bot.py says: changing to", value
-                                return value
-                                
+                                command, value = com.string_to_command(data)
+                                # change MODE, STATUS, SPEED, DISTANCELIMITS#
+                                    #print 'MasterID: ', ID , 'PARAM: ' , PARAM , 'VALUE: ' , VALUE
+                                if command == c.COMMAND_SPEED:
+                                    set_element(flags,'master_set_speed',True)
+                                    prev_SPEED_RUN = SPEED_RUN
+                                    if value == '+':
+                                        SPEED_RUN += 5
+                                    elif value == '-':
+                                        SPEED_RUN -= 5
+                                    else:
+                                        SPEED_RUN = value
+                                    print 'Set SPEED_RUN from '+ str(prev_SPEED_RUN) + ' to ' + str(SPEED_RUN)           
+                                elif command == c.COMMAND_DIST:
+                                    prev_DIST_MIN = DIST_MIN
+                                    if not value.isdigit():
+                                        print "Something went terribly wrong with the protocol..."
+                                        raise KeyboardInterrupt
+                                    DIST_MIN = value
+                                elif command == c.COMMAND_BLINK:
+                                    helper.blink('white')
+                                    set_element(flags, 'master_set_LED', True)
+                                   # print 'Set DIST_MIN from '+ str(prev_DIST_MIN) + ' to ' + str(DIST_MIN)           
+                                elif command == c.COMMAND_RESET:    
+                                    SPEED_RUN = c.SPEED_RUN
+                                    SPEED_WARN = c.SPEED_WARN
+                                    SPEED_CONTROL_MAX = c.SPEED_CONTROL_MAX
+                                    SPEED_CONTROL_MIN = c.SPEED_STOP
+                                    DIST_MIN = c.DIST_MIN
+                                    set_element(times,'prev_get_dist',0)
+                                    set_element(flags,'master_set_LED', True)
+                                    set_element(flags,'master_set_speed', True)
+                                    warning = True * len(warning)
+                                elif command == c.COMMAND_STATE:    
+                                    if value == c.VALUE_STATE_RUNNING:
+                                        state = 'RUNNING'
+                                    elif value == c.VALUE_STATE_IDLE:
+                                        state = 'IDLE'
+                                #elif command == c.COMMAND_TYPE and value != c.VALUE_TYPE_COM:
+                                elif command == c.COMMAND_TYPE:
+                                    if value == c.VALUE_TYPE_ORIGINAL:
+                                        value = helper.determine_team(OWN_ID)
+                                    print "com_bot.py says: changing to", value
+                                    return value
+                            except:
+                                print "Error interpreting message from master! Continuing anyway"
                         
     
                                         

@@ -39,7 +39,7 @@ last_recipient = ''
 print bcolors.UNDERLINE + "Either type command in form IDcommandvalue or one after the other. To repeat the last command, simply press 'r' and enter'\n" + bcolors.ENDC
 while True:
     print "_" * 100
-    identifier = raw_input('ID ([0:11] or (al)l | (co)m_bots | (au)to  or whole command: \t')
+    identifier = raw_input(('ID (['+str(c.TEAM_START-100)+':'+str(c.TEAM_SIZE)+'] or (al)l | (co)m_bots | (au)to  or whole command: \t\t\t'))
     if identifier == 'r':
         if message == '':
             print bcolors.FAIL + 'No message sent so far!' + bcolors.ENDC
@@ -118,6 +118,9 @@ while True:
             elif string[0].lower() == 'b':
                 commmand = c.COMMAND_BLINK
                 value = ''
+            elif string[0].lower() == 'r':
+                commmand = c.COMMAND_RESET
+                value = ''
             else:
                 print bcolors.FAIL + 'COMMAND UNKNOWN! \n repeat!' + bcolors.ENDC
                 continue
@@ -147,13 +150,13 @@ while True:
                     continue
             
             # parsing command            
-            command = raw_input("Type command:\t(s)peed | (t)ype | st(a)te | (b)link | (d)ist\t")
+            command = raw_input("Command:\t(t)ype | st(a)te | (b)link | (r)eset | (s)peed | (d)ist:\t")
             command = command.lower()
             # mode change
             if command == 'a':                
                 command = c.COMMAND_STATE
                 # parsing value
-                value = raw_input("Type state:\t (i)dle | (r)unning\t\t")
+                value = raw_input("Type state:\t\t\t (i)dle | (r)unning\t\t\t\t")
                 value = value.lower()
                 if value == 'i':
                     value = c.VALUE_STATE_IDLE
@@ -166,7 +169,7 @@ while True:
             elif command == 's':                
                 command = c.COMMAND_SPEED
                 #parsing value
-                value = raw_input("Type absolute value OR \'+\' or \'-\'\t\t\t\t")
+                value = raw_input("Type absolute value OR \'+\' or \'-\'\t\t\t\t\t\t")
                 if value == '+':
                     value = c.VALUE_SPEED_INCREMENT
                 elif value == '-':
@@ -183,7 +186,7 @@ while True:
             # blink       
             elif command == 't':
                 command = c.COMMAND_TYPE
-                value = raw_input("Type type:\t(co)m | (au)to | (i)dle | (o)riginal\t\t").lower()
+                value = raw_input("Type type:\t(co)m | (au)to | (i)dle | (o)riginal\t\t\t\t").lower()
                 if value == 'co':
                     value = c.VALUE_TYPE_COM
                 elif value == 'au':
@@ -197,11 +200,15 @@ while True:
                     continue
             elif command == 'd':
                 command = c.COMMAND_DIST
-                value = raw_input("Type new MIN_DIST:\t\t\t\t\t\t")
+                value = raw_input("Type new MIN_DIST:\t\t\t\t\t\t\t\t")
                 if not value.isdigit():
                     print bcolors.FAIL + "NOT AN INTEGER" + bcolors.ENDC
+                    continue
             elif command == 'b':                
                 command = c.COMMAND_BLINK
+                value = ""
+            elif command == 'r':
+                command = c.COMMAND_RESET
                 value = ""
                 
 
