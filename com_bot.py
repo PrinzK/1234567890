@@ -40,6 +40,7 @@ def start():
                 times.append(['prev_set_LED',0.0])    
                 flags = []
                 flags.append(['set_motor',False])
+                flags.append(['status_warn_LED',False])
                 flags.append(['button_release',False])
                 flags.append(['master_set_speed',False])
                 flags.append(['master_set_button',False])
@@ -54,7 +55,7 @@ def start():
                 OWN_IP = com.get_ip()
                 OWN_ID = com.get_id_from_ip(OWN_IP)
                 prev_state = state
-                state = 'RUNNING'
+                state = 'IDLE'
    
     
             if state == 'IDLE':
@@ -80,6 +81,8 @@ def start():
                         sender_ID = com.get_id_from_ip(addr[0])
                         if sender_ID < c.TEAM_START or sender_ID > c.TEAM_END:
                             command, value = com.string_to_command(data)
+                            #
+                            print 'MASTER:' , sender_ID , ' : ' , data
                             try:
                                 if command == c.COMMAND_SPEED:
                                     helper.set_element(flags,'master_set_speed',True)
@@ -112,11 +115,10 @@ def start():
                                     helper.set_element(flags,'master_set_speed', True)
                                     warning = True * len(warning)
                                 elif command == c.COMMAND_STATE:
-                                    helper.set_element(flags,'master_set_state', True)
                                     if value == c.VALUE_STATE_RUNNING:
-                                        next_state = 'RUNNING'
+                                        state = 'RUNNING'
                                     elif value == c.VALUE_STATE_IDLE:
-                                        next_state = 'IDLE'
+                                        state = 'IDLE'
                                 elif command == c.COMMAND_TYPE:
                                     if value == c.VALUE_TYPE_ORIGINAL:
                                         value = helper.determine_team(OWN_ID)

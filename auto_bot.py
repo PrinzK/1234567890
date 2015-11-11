@@ -61,34 +61,35 @@ def start():
     mode = 'STOP'
     prev_mode = ''
 
-    speed = 0
-    distance = 0
-    warning = []
-
-    times = []
-    times.append(['prev_get_dist',0.0])
-    times.append(['prev_get_switch',0.0])
-    times.append(['prev_set_motor',0.0])
-    times.append(['get_warning',0.0])
-          
-    flags = []
-    flags.append(['set_motor',False])
-    flags.append(['button_release',False])
-    flags.append(['master_set_speed',False])
-    flags.append(['master_set_button',False])
-    flags.append(['master_set_LED',False])    
     
-    SPEED_RUN = c.SPEED_RUN
-    SPEED_WARN = c.SPEED_WARN
-    SPEED_CONTROL_MAX = c.SPEED_CONTROL_MAX
-    SPEED_CONTROL_MIN = c.SPEED_STOP
-    DIST_MIN = c.DIST_MIN
     try:
         while True:
             if state == 'INIT':
+                speed = 0
+                distance = 0
+                warning = []
+            
+                times = []
+                times.append(['prev_get_dist',0.0])
+                times.append(['prev_get_switch',0.0])
+                times.append(['prev_set_motor',0.0])
+                times.append(['get_warning',0.0])
+                      
+                flags = []
+                flags.append(['set_motor',False])
+                flags.append(['button_release',False])
+                flags.append(['master_set_speed',False])
+                flags.append(['master_set_button',False])
+                flags.append(['master_set_LED',False])    
+                
+                SPEED_RUN = c.SPEED_RUN
+                SPEED_WARN = c.SPEED_WARN
+                SPEED_CONTROL_MAX = c.SPEED_CONTROL_MAX
+                SPEED_CONTROL_MIN = c.SPEED_STOP
+                DIST_MIN = c.DIST_MIN
                 pi2go.init()
                 pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_ON)
-                time.sleep(1)
+                #time.sleep(1)
                 sock = com.init_nonblocking_receiver('',c.PORT)
                 for x in range(c.TEAM_SIZE):
                     warning.append(True)
@@ -102,7 +103,7 @@ def start():
     
             if state == 'IDLE':
                 if prev_state != 'IDLE':
-                    pi2go.setAllLEDs(c.LED_ON,c.LED_OFF,c.LED_OFF)
+                    pi2go.setAllLEDs(c.LED_OFF,c.LED_OFF,c.LED_ON)
                     pi2go.stop()
                 if check_time_limit(times,'prev_get_switch',c.WAIT_SWITCH):
                     # Pressed = 1, Released = 0
@@ -241,7 +242,7 @@ def start():
                                     if value == c.VALUE_TYPE_ORIGINAL:
                                         value = helper.determine_team(OWN_ID)
                                     return value
-                        except:
+                            except:
                                 print "Error interpreting message from master! Continuing anyway"
                                 
                         

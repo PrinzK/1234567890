@@ -44,7 +44,7 @@ while True:
         if message == '':
             print bcolors.FAIL + 'No message sent so far!' + bcolors.ENDC
         else:
-            print bcolors.BOLD + "Repeating last command:\t" + bcolors.ENDC + bcolors.OKGREEN +  '\tTo:\t' + last_recipient + bcolors.OKBLUE + "\tsent message:\t" + message + bcolors.ENDC
+            print bcolors.BOLD + "Repeating last command:\t\t\t\t" + bcolors.ENDC + bcolors.OKGREEN +  '\tTo:\t' + last_recipient + bcolors.OKBLUE + "\tsent message:\t" + message + bcolors.ENDC
             com.send_broadcast_message(c.PORT, message)
     # not repeating        
     else:
@@ -63,12 +63,16 @@ while True:
             elif not string[0].isdigit():
                 print bcolors.FAIL + 'First character must be digit!' + bcolors.ENDC
                 continue
-            elif string[1].isdigit():
+            elif string[0:3].isdigit():
+                identifier = string[0:3]
+                string = string[3:]
+            elif string[0:2].isdigit():
                 identifier = str("1" + string[0:2])
                 string = string[2:]
             else:
                 identifier = str('10' + string[0])
                 string = string[1:]
+            
             # mode command
             if string[0].lower() == 'a':
                 command = c.COMMAND_STATE
@@ -110,16 +114,16 @@ while True:
                     continue
             elif string[0].lower() == 'd':
                 command = c.COMMAND_DIST
-                value = string[1:0]
+                value = string[1:]
                 if not value.isdigit():
                     bcolors.FAIL + 'VALUE NOT AN INTEGER \nrepeat!' + bcolors.ENDC
                     continue
             # blink command        
             elif string[0].lower() == 'b':
-                commmand = c.COMMAND_BLINK
+                command = c.COMMAND_BLINK
                 value = ''
             elif string[0].lower() == 'r':
-                commmand = c.COMMAND_RESET
+                command = c.COMMAND_RESET
                 value = ''
             else:
                 print bcolors.FAIL + 'COMMAND UNKNOWN! \n repeat!' + bcolors.ENDC
@@ -142,7 +146,7 @@ while True:
                 try: 
                     int(identifier)
                 except ValueError:
-                    print bcolors.FAIL + 'VALUE NOT AN INTEGER \nrepeat!' + bcolors.ENDC
+                    print bcolors.FAIL + 'VALUE NEITHER AN INTEGER NOR AN IDENTIFIER\nrepeat!' + bcolors.ENDC
                     continue
                     
                 if c.TEAM_START > int(identifier) or int(identifier) > c.TEAM_END:
@@ -236,7 +240,12 @@ while True:
             target_ip = c.SUBNET_IP + identifier
             message = command + " " + value    
             com.send_udp_unicast_message(target_ip, c.PORT, message)
-        print bcolors.OKGREEN +  '\t\t\t\tTo:\t' + identifier + bcolors.OKBLUE +"\tsent message:\t" + message + bcolors.ENDC
+        # just for making the output a bit prettier    
+        if identifier != "com_bots" and identifier != "auto_bots":
+            tabornottab = "\t"
+        else:
+            tabornottab = ""
+        print bcolors.OKGREEN +  '\t\t\t\t\t\t\tTo:\t' + identifier + tabornottab + bcolors.OKBLUE +"\tsent message:\t" + message + bcolors.ENDC
         last_recipient = identifier
                 
             

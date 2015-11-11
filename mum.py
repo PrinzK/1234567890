@@ -2,20 +2,17 @@ import communication as com
 import com_bot
 import auto_bot
 import constants as c
-import helpers
+import helper
 
 
 
-helpers.blink()
+helper.blink()
 #sock = com.init_receiver('', c.PORT)
 
 OWN_IP = com.get_ip()
 OWN_ID = com.get_id_from_ip(OWN_IP)
 
-if OWN_ID - c.TEAM_START < c.COM_TEAM_SIZE:
-    value = c.VALUE_TYPE_COM
-else:
-    value = c.VALUE_TYPE_AUTO
+value = helper.determine_team(OWN_ID)
 
 try:
     
