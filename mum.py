@@ -46,6 +46,8 @@ try:
             command, value = com.string_to_command(data)
             if command != c.COMMAND_TYPE:
                 value = c.VALUE_TYPE_IDLE
+            else:
+                value = c.VALUE_TYPE_IDLE
             com.close_socket(sock)
             status = "Exiting idle_mode"
             print status

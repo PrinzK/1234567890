@@ -44,7 +44,7 @@ while True:
         if message == '':
             print bcolors.FAIL + 'No message sent so far!' + bcolors.ENDC
         else:
-            print bcolors.BOLD + "Repeating last command:\t\t\t\t" + bcolors.ENDC + bcolors.OKGREEN +  '\tTo:\t' + last_recipient + bcolors.OKBLUE + "\tsent message:\t" + message + bcolors.ENDC
+            print bcolors.BOLD + "Repeating last command:\t\t\t\t" + bcolors.ENDC + bcolors.OKGREEN +  '\tTo:\t' + last_recipient + bcolors.OKBLUE + "\t\tsent message:\t" + message + bcolors.ENDC
             com.send_broadcast_message(c.PORT, message)
     # not repeating        
     else:
@@ -74,9 +74,9 @@ while True:
                 string = string[1:]
             
             # mode command
-            if string[0].lower() == 'a':
+            if string[0:2].lower() == 'st':
                 command = c.COMMAND_STATE
-                string = string[1:]
+                string = string[2:]
                 if 'i' in string.lower():
                     value = c.VALUE_STATE_IDLE
                 elif 'r' in string.lower():
@@ -85,9 +85,9 @@ while True:
                     print bcolors.FAIL + "STATE NOT RECOGNIZED" + bcolors.ENDC
                     continue
             # speed commmand
-            elif string[0].lower() == 's':
+            elif string[0:2].lower() == 'sp':
                 command = c.COMMAND_SPEED
-                string = string[1:]
+                string = string[2:]
                 if string[0] == '+':
                     value = c.VALUE_SPEED_INCREMENT
                 elif string[0] == '-':
@@ -154,10 +154,10 @@ while True:
                     continue
             
             # parsing command            
-            command = raw_input("Command:\t(t)ype | st(a)te | (b)link | (r)eset | (s)peed | (d)ist:\t")
+            command = raw_input("Command:\t(t)ype | (st)ate | (b)link | (r)eset | (sp)eed | (d)ist:\t")
             command = command.lower()
             # mode change
-            if command == 'a':                
+            if command == 'st':                
                 command = c.COMMAND_STATE
                 # parsing value
                 value = raw_input("Type state:\t\t\t (i)dle | (r)unning\t\t\t\t")
@@ -170,7 +170,7 @@ while True:
                     print bcolors.FAIL + "STATE NOT RECOGNIZED" + bcolors.ENDC
                     continue
             # speed change
-            elif command == 's':                
+            elif command == 'sp':                
                 command = c.COMMAND_SPEED
                 #parsing value
                 value = raw_input("Type absolute value OR \'+\' or \'-\'\t\t\t\t\t\t")
