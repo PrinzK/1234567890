@@ -155,8 +155,6 @@ while True:
                     value = c.VALUE_TYPE_COM
                 elif 'au' in string.lower():
                     value = c.VALUE_TYPE_AUTO
-                elif 'i' in string.lower():
-                    value = c.VALUE_TYPE_IDLE
                 elif 'o' in string.lower():
                     value = c.VALUE_TYPE_ORIGINAL
                 else:
@@ -245,8 +243,6 @@ while True:
                     value = c.VALUE_TYPE_COM
                 elif value == 'au':
                     value = c.VALUE_TYPE_AUTO
-                elif value == 'i':
-                    value = c.VALUE_TYPE_IDLE
                 elif value == 'o':
                     value = c.VALUE_TYPE_ORIGINAL
                 else:

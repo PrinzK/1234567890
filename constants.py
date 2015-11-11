@@ -16,7 +16,6 @@ BC_IP = '192.168.178.255'
 COMMAND_TYPE = "type"
 VALUE_TYPE_COM = "go_com"
 VALUE_TYPE_AUTO = "go_auto"
-VALUE_TYPE_IDLE = "go_idle"
 VALUE_TYPE_ORIGINAL = "go_original"
 COMMAND_STATE = "state"
 VALUE_STATE_RUNNING = "running"
