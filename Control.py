@@ -87,7 +87,6 @@ while True:
             else:
                 tabornottab = ""
             print bcolors.BOLD + "Repeating last command:\t\t\t\t" + bcolors.ENDC + bcolors.OKGREEN + '\tTo:\t' + last_receiver + tabornottab + bcolors.OKBLUE +"\tsent message:\t" + message + bcolors.ENDC
-            last_receiver = identifier
     # not repeating        
     else:
         # one-input mode
@@ -274,7 +273,7 @@ while True:
                 #print str(target_id) + " " + str(bot_type[target_id])
                 if bot_type[target_id] == c.VALUE_TYPE_COM:
                     target_ip = c.SUBNET_IP + str(c.TEAM_START + target_id)
-                    print "actually sending sth.! to " + target_ip
+                    #print "actually sending sth.! to " + target_ip
                     com.send_udp_unicast_message(target_ip, c.PORT, message)
                     time.sleep(c.WAIT_SEND)
                     

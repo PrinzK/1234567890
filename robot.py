@@ -52,6 +52,7 @@ prev_state = ''
 mode = 'STOP'
 prev_mode = ''
 
+
 SPEED_RUN = c.SPEED_RUN
 SPEED_WARN = round(float(SPEED_RUN)/3,0)
 SPEED_CONTROL_MAX = SPEED_RUN
@@ -87,10 +88,7 @@ flags.append(['robot_type_com',False])
 try:
     while True:       
         if state == 'INIT':
-            pi2go.init()
-            pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_ON)
-            time.sleep(1)
-            
+            pi2go.init()            
             sock = com.init_nonblocking_receiver('',c.PORT)
                 
             OWN_IP = com.get_ip()
@@ -103,7 +101,7 @@ try:
             elif helper.determine_team(OWN_ID) == c.VALUE_TYPE_AUTO:
                 print "I'm in auto_mode now!"
                 helper.set_element(flags,'robot_type_com',False)
-            
+            local_prev_value = helper.determine_team(OWN_ID)
             #TODO: IDLE-STATE?
             prev_state = state
             state = 'IDLE'
@@ -111,7 +109,10 @@ try:
 
         if state == 'IDLE':
             if prev_state != 'IDLE':
-                pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_OFF)
+                if helper.get_element(flags, 'robot_type_com'):
+                    pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_ON)
+                else: 
+                    pi2go.setAllLEDs(c.LED_OFF,c.LED_ON,c.LED_ON)
                 pi2go.stop()
             if helper.check_time_limit(times,'prev_get_switch',c.WAIT_SWITCH):
                 # Pressed = 1, Released = 0
@@ -130,7 +131,16 @@ try:
                 data, addr = com.receive_message(sock) 
                 if data != '':
                     sender_ID = com.get_id_from_ip(addr[0])
-                    if sender_ID < c.TEAM_START or sender_ID > c.TEAM_END:
+                    if sender_ID == OWN_ID:
+                        #print 'OWN: ' , sender_ID, ' : ' , data
+                        continue
+                    if sender_ID >= c.TEAM_START and sender_ID <= c.TEAM_END:
+                        #print 'ROBOT: ', sender_ID, ' : ' , data
+                        if data == 'PROBLEM':
+                            warning[sender_ID-c.TEAM_START] = False
+                        elif data == 'RELEASE':
+                            warning[sender_ID-c.TEAM_START] = True
+                    else:
                         command, value = com.string_to_command(data)
                         #
                         print 'MASTER:' , sender_ID , ' : ' , data
@@ -175,12 +185,18 @@ try:
                                 print 'Going from state ' + local_prev_state + ' to state ' + state
                             elif command == c.COMMAND_TYPE:
                                 if value == c.VALUE_TYPE_ORIGINAL:
-                                    value = helper.determine_team(OWN_ID)
+                                    if helper.determine_team(OWN_ID) == c.VALUE_TYPE_COM:
+                                        helper.set_element(flags,'robot_type_com', True)
+                                    else:
+                                        helper.set_element(flags,'robot_type_com', False)
+                                        com.send_x_broadcast_messages(c.PORT, "RELEASE", c.SENDING_ATTEMPTS, c.WAIT_SEND)
                                 elif value == c.VALUE_TYPE_COM:
                                     helper.set_element(flags,'robot_type_com', True)                                    
                                 elif value == c.VALUE_TYPE_AUTO:
                                     helper.set_element(flags,'robot_type_com', False)
+                                    com.send_x_broadcast_messages(c.PORT, "RELEASE", c.SENDING_ATTEMPTS, c.WAIT_SEND)
                                 print "MASTER: Changing from type " + local_prev_value + " to type " + value
+                                local_prev_value = value
                         except:
                             print "Error interpreting message from master! Continuing anyway"
 
@@ -259,11 +275,17 @@ try:
                             elif command == c.COMMAND_TYPE:
                                 local_prev_value = value
                                 if value == c.VALUE_TYPE_ORIGINAL:
-                                    value = helper.determine_team(OWN_ID)
+                                    if helper.determine_team(OWN_ID) == c.VALUE_TYPE_COM:
+                                        helper.set_element(flags,'robot_type_com', True)
+                                    else:
+                                        helper.set_element(flags,'robot_type_com', False)
+                                        com.send_x_broadcast_messages(c.PORT, "RELEASE", c.SENDING_ATTEMPTS, c.WAIT_SEND)
                                 elif value == c.VALUE_TYPE_COM:
                                     helper.set_element(flags,'robot_type_com', True)                                    
                                 elif value == c.VALUE_TYPE_AUTO:
                                     helper.set_element(flags,'robot_type_com', False)
+                                    com.send_x_broadcast_messages(c.PORT, "RELEASE", c.SENDING_ATTEMPTS, c.WAIT_SEND)
+                                    
                                 print "MASTER: Changing from type " + local_prev_value + " to type " + value
                         except:
                             print "Error interpreting message from master! Continuing anyway"
@@ -366,7 +388,7 @@ try:
 
                 
             # Send
-            if mode != prev_mode:                          
+            if mode != prev_mode and helper.get_element(flags, 'robot_type_com'):                          
                 if prev_mode == 'STOP':
                     com.send_x_broadcast_messages(c.PORT, "RELEASE", c.SENDING_ATTEMPTS, c.WAIT_SEND)
                 elif mode == 'STOP':
