@@ -58,12 +58,8 @@ while True:
             # to all...
             if last_receiver == 'all':
                 com.send_broadcast_message(c.PORT, message)
+                
             # to all communicating bots
-            #elif identifier == 'com_bots':
-            #    message = command + " " + value
-            #    for x in range(c.TEAM_START, c.TEAM_START + c.COM_TEAM_SIZE):                
-            #        target_ip = c.SUBNET_IP + str(x)
-            #        com.send_udp_unicast_message(target_ip, c.PORT, message)
             elif last_receiver == 'com_bots':
                 for target_id in range(len(bot_type)):
                     #print str(target_id) + " " + str(bot_type[target_id])
@@ -73,11 +69,6 @@ while True:
                         com.send_udp_unicast_message(target_ip, c.PORT, message)
                         
             # to all autonomous bots            
-            #elif identifier == 'auto_bots':
-            #    message = command + " " + value
-            #    for x in range(c.TEAM_START + c.COM_TEAM_SIZE, c.TEAM_END):
-            #        target_ip = c.SUBNET_IP + str(x)
-            #        com.send_udp_unicast_message(target_ip, c.PORT, message)
             elif last_receiver == 'auto_bots':
                 for target_id in range(len(bot_type)):
                     if bot_type[target_id] == c.VALUE_TYPE_AUTO:
@@ -85,6 +76,7 @@ while True:
                         #print "actually sending sth.! to " + target_ip
                         com.send_udp_unicast_message(target_ip, c.PORT, message)
                         time.sleep(c.WAIT_SEND)
+                        
             # to one bot
             else:
                 target_ip = c.SUBNET_IP + last_receiver
@@ -238,7 +230,7 @@ while True:
             # blink       
             elif command == 't':
                 command = c.COMMAND_TYPE
-                value = raw_input("Type type:\t(co)m | (au)to | (o)riginal\t\t\t\t").lower()
+                value = raw_input("Type type:\t\t(co)m | (au)to | (o)riginal\t\t\t\t").lower()
                 if value == 'co':
                     value = c.VALUE_TYPE_COM
                 elif value == 'au':
@@ -349,6 +341,6 @@ while True:
                     bot_type[index] = c.VALUE_TYPE_AUTO
                 elif value == c.VALUE_TYPE_ORIGINAL:
                     bot_type[index] = helper.determine_team(identifier)
-            print bot_type
+            #print bot_type
     
         
