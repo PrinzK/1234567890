@@ -3,7 +3,7 @@
 
 FILE=$1
 IP_START=100
-ROBOT_COUNT=10
+ROBOT_COUNT=15
 IP_END=$(($IP_START+$ROBOT_COUNT))
 echo "Transmitting $FILE to Robots in IP-Range from 192.168.178.$IP_START to 192.168.178.$IP_END"
 for ip_counter in $(seq $IP_START $IP_END)

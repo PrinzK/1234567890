@@ -113,12 +113,15 @@ def start():
                                     helper.set_element(times,'prev_get_dist',0)
                                     helper.set_element(flags,'master_set_LED', True)
                                     helper.set_element(flags,'master_set_speed', True)
-                                    warning = True * len(warning)
+                                    warning = [True] * len(warning)
+                                    print "Reset major values"
                                 elif command == c.COMMAND_STATE:
+                                    local_prev_state = state
                                     if value == c.VALUE_STATE_RUNNING:
                                         state = 'RUNNING'
                                     elif value == c.VALUE_STATE_IDLE:
                                         state = 'IDLE'
+                                    print 'Going from state ' + local_prev_state + ' to state ' + state
                                 elif command == c.COMMAND_TYPE:
                                     if value == c.VALUE_TYPE_ORIGINAL:
                                         value = helper.determine_team(OWN_ID)
@@ -135,7 +138,7 @@ def start():
                     new_dist = pi2go.getDistance()
                     if new_dist > 1:
                         distance = new_dist
-                    print 'dt:', time_between , distance
+                        print 'dt:', time_between , distance
                 
                 # Obstacle = 1, No Obstacle = 0
                 irCentre = pi2go.irCentre()
@@ -177,14 +180,14 @@ def start():
                                         SPEED_RUN -= 5
                                     else:
                                         SPEED_RUN = value
-                                    print 'Set SPEED_RUN from '+ str(prev_SPEED_RUN) + ' to ' + str(SPEED_RUN)           
+                                    print 'MASTER: Set SPEED_RUN from '+ str(prev_SPEED_RUN) + ' to ' + str(SPEED_RUN)           
                                 elif command == c.COMMAND_DIST:
                                     prev_DIST_MIN = DIST_MIN
                                     if not value.isdigit():
                                         print "Something went terribly wrong with the protocol..."
                                         raise KeyboardInterrupt
                                     DIST_MIN = value
-                                    print 'Set DIST_MIN from '+ str(prev_DIST_MIN) + ' to ' + str(DIST_MIN)  
+                                    print 'MASTER: Set DIST_MIN from '+ str(prev_DIST_MIN) + ' to ' + str(DIST_MIN)  
                                 elif command == c.COMMAND_BLINK:
                                     helper.blink('white')
                                     helper.set_element(flags, 'master_set_LED', True)
@@ -197,18 +200,21 @@ def start():
                                     helper.set_element(times,'prev_get_dist',0)
                                     helper.set_element(flags,'master_set_LED', True)
                                     helper.set_element(flags,'master_set_speed', True)
-                                    warning = True * len(warning)
+                                    warning = [True] * len(warning)
+                                    print 'MASTER: Reset major values'
                                 elif command == c.COMMAND_STATE:
                                     helper.set_element(flags,'master_set_state', True)
                                     if value == c.VALUE_STATE_RUNNING:
                                         next_state = 'RUNNING'
                                     elif value == c.VALUE_STATE_IDLE:
                                         next_state = 'IDLE'
+                                    print 'MASTER: Going from state ' + state + ' to state ' + next_state
                                 #elif command == c.COMMAND_TYPE and value != c.VALUE_TYPE_COM:
                                 elif command == c.COMMAND_TYPE:
+                                    local_prev_value = value
                                     if value == c.VALUE_TYPE_ORIGINAL:
                                         value = helper.determine_team(OWN_ID)
-                                    print "com_bot.py says: changing to", value
+                                    print "MASTER: Changing from type " + local_prev_value + " to type " + value
                                     return value
                             except:
                                 print "Error interpreting message from master! Continuing anyway"

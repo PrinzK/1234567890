@@ -13,7 +13,7 @@ OWN_IP = com.get_ip()
 OWN_ID = com.get_id_from_ip(OWN_IP)
 
 value = helper.determine_team(OWN_ID)
-
+sock = com.init_nonblocking_receiver('', c.PORT)
 try:
     
     #data, addr = com.receive_message(sock)
@@ -24,7 +24,9 @@ try:
             status = "I'm in com_mode now!"            
             print status
             #communication.send_broadcast_message(c.PORT, status)  
-            value = com_bot.start()            
+            com.close_socket(sock)
+            value = com_bot.start() 
+            sock = com.init_nonblocking_receiver('', c.PORT)
             status = "Exiting com_mode"
             com.send_x_broadcast_messages(c.PORT, "RELEASE", c.SENDING_ATTEMPTS, c.WAIT_SEND)
             print status
@@ -33,7 +35,9 @@ try:
             status ="I'm in auto_mode now!"            
             print status
             #communication.send_broadcast_message(PORT, status)
+            com.close_socket(sock)
             value = auto_bot.start()
+            sock = com.init_nonblocking_receiver('', c.PORT)
             status = "Exiting auto_mode"
             print status
             #communication.send_broadcast_message(PORT, status)
@@ -41,14 +45,17 @@ try:
             status = "I'm in idle_mode now!"
             print status
             #communication.send_broadcast_message(PORT, status)
-            sock = com.init_receiver('', c.PORT)
+            
             data, addr = com.receive_message(sock)
             command, value = com.string_to_command(data)
-            if command != c.COMMAND_TYPE:
-                value = c.VALUE_TYPE_IDLE
-            else:
-                value = c.VALUE_TYPE_IDLE
-            com.close_socket(sock)
+            while command != c.COMMAND_TYPE and (value != c.VALUE_TYPE_AUTO or value != c.VALUE_TYPE_COM):
+                data, addr = com.receive_message(sock)
+                command, value = com.string_to_command(data)
+            #if command != c.COMMAND_TYPE:
+            #    value = c.VALUE_TYPE_IDLE
+            #else:
+            #    value = c.VALUE_TYPE_IDLE
+            
             status = "Exiting idle_mode"
             print status
             #communication.send_broadcast_message(c.PORT, status)

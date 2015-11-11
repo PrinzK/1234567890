@@ -56,8 +56,6 @@ def init_blocking_receiver(address, port, timeout):
  
 def close_socket(sock):
     sock.close()
-    print "Exiting clock_socket"
-
 
 def receive_message(sock):
 	data = ""
