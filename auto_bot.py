@@ -297,8 +297,8 @@ def start():
                 
                 # Blocking Avoidance
                 elif mode == 'SLOW':
-                    KP = float(SPEED_CONTROL_MAX - SPEED_CONTROL_MIN)/float(c.DIST_REF-DIST_MIN)
-                    error = c.DIST_REF - distance
+                    KP = float(SPEED_CONTROL_MAX - SPEED_CONTROL_MIN)/float(c.DIST_MAX-DIST_MIN)
+                    error = c.DIST_MAX - distance
                     new_value = round(SPEED_RUN - error * KP,1)
                     
                     if new_value < SPEED_CONTROL_MIN:
