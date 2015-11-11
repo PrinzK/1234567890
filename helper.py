@@ -8,8 +8,13 @@ Created on Mon Nov  9 18:11:32 2015
 
 import time
 import communication as com
-import pi2go
 import constants as c
+try: 
+    import pi2go
+except:
+    pass
+
+
 
 
 def find_element(list_2D,element):

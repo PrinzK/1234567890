@@ -1,5 +1,7 @@
 import communication as com
 import constants as c
+import time
+import helper
 
 class bcolors:
     HEADER = '\033[95m'
@@ -35,7 +37,15 @@ def set_numberof_com_bots(number_of_com_bots):
     pass
 """
 message = ''
-last_recipient = ''
+last_receiver = ''
+
+bot_type = []
+for identifier in range(c.TEAM_START, c.COM_TEAM_SIZE+c.TEAM_START):
+    bot_type.append(c.VALUE_TYPE_COM)
+for identifier in range(c.TEAM_START+c.COM_TEAM_SIZE, c.TEAM_END):
+    bot_type.append(c.VALUE_TYPE_AUTO)
+
+
 print bcolors.UNDERLINE + "Either type command in form IDcommandvalue or one after the other. To repeat the last command, simply press 'r' and enter'\n" + bcolors.ENDC
 while True:
     print "_" * 100
@@ -44,8 +54,48 @@ while True:
         if message == '':
             print bcolors.FAIL + 'No message sent so far!' + bcolors.ENDC
         else:
-            print bcolors.BOLD + "Repeating last command:\t\t\t\t" + bcolors.ENDC + bcolors.OKGREEN +  '\tTo:\t' + last_recipient + bcolors.OKBLUE + "\t\tsent message:\t" + message + bcolors.ENDC
-            com.send_broadcast_message(c.PORT, message)
+            # everything should be valid...
+            # to all...
+            if last_receiver == 'all':
+                com.send_broadcast_message(c.PORT, message)
+            # to all communicating bots
+            #elif identifier == 'com_bots':
+            #    message = command + " " + value
+            #    for x in range(c.TEAM_START, c.TEAM_START + c.COM_TEAM_SIZE):                
+            #        target_ip = c.SUBNET_IP + str(x)
+            #        com.send_udp_unicast_message(target_ip, c.PORT, message)
+            elif last_receiver == 'com_bots':
+                for target_id in range(len(bot_type)):
+                    #print str(target_id) + " " + str(bot_type[target_id])
+                    if bot_type[target_id] == c.VALUE_TYPE_COM:
+                        target_ip = c.SUBNET_IP + str(c.TEAM_START + target_id)
+                        #print "actually sending sth.! to " + target_ip
+                        com.send_udp_unicast_message(target_ip, c.PORT, message)
+                        
+            # to all autonomous bots            
+            #elif identifier == 'auto_bots':
+            #    message = command + " " + value
+            #    for x in range(c.TEAM_START + c.COM_TEAM_SIZE, c.TEAM_END):
+            #        target_ip = c.SUBNET_IP + str(x)
+            #        com.send_udp_unicast_message(target_ip, c.PORT, message)
+            elif last_receiver == 'auto_bots':
+                for target_id in range(len(bot_type)):
+                    if bot_type[target_id] == c.VALUE_TYPE_AUTO:
+                        target_ip = c.SUBNET_IP + str(c.TEAM_START + target_id)
+                        #print "actually sending sth.! to " + target_ip
+                        com.send_udp_unicast_message(target_ip, c.PORT, message)
+                        time.sleep(c.WAIT_SEND)
+            # to one bot
+            else:
+                target_ip = c.SUBNET_IP + last_receiver
+                com.send_udp_unicast_message(target_ip, c.PORT, message)
+            # just for making the output a bit prettier    
+            if last_receiver != "com_bots" and last_receiver != "auto_bots":
+                tabornottab = "\t"
+            else:
+                tabornottab = ""
+            print bcolors.BOLD + "Repeating last command:\t\t\t\t" + bcolors.ENDC + bcolors.OKGREEN + '\tTo:\t' + last_receiver + tabornottab + bcolors.OKBLUE +"\tsent message:\t" + message + bcolors.ENDC
+            last_receiver = identifier
     # not repeating        
     else:
         # one-input mode
@@ -190,7 +240,7 @@ while True:
             # blink       
             elif command == 't':
                 command = c.COMMAND_TYPE
-                value = raw_input("Type type:\t(co)m | (au)to | (i)dle | (o)riginal\t\t\t\t").lower()
+                value = raw_input("Type type:\t(co)m | (au)to | (o)riginal\t\t\t\t").lower()
                 if value == 'co':
                     value = c.VALUE_TYPE_COM
                 elif value == 'au':
@@ -224,18 +274,37 @@ while True:
         if identifier == 'all':
             message = command + " " + value
             com.send_broadcast_message(c.PORT, message)
-        # to one bot
+        # to all communicating bots
+        #elif identifier == 'com_bots':
+        #    message = command + " " + value
+        #    for x in range(c.TEAM_START, c.TEAM_START + c.COM_TEAM_SIZE):                
+        #        target_ip = c.SUBNET_IP + str(x)
+        #        com.send_udp_unicast_message(target_ip, c.PORT, message)
         elif identifier == 'com_bots':
             message = command + " " + value
-            for x in range(c.TEAM_START, c.TEAM_START + c.COM_TEAM_SIZE):                
-                target_ip = c.SUBNET_IP + str(x)
-                com.send_udp_unicast_message(target_ip, c.PORT, message)
-                
+            for target_id in range(len(bot_type)):
+                #print str(target_id) + " " + str(bot_type[target_id])
+                if bot_type[target_id] == c.VALUE_TYPE_COM:
+                    target_ip = c.SUBNET_IP + str(c.TEAM_START + target_id)
+                    print "actually sending sth.! to " + target_ip
+                    com.send_udp_unicast_message(target_ip, c.PORT, message)
+                    time.sleep(c.WAIT_SEND)
+                    
+        # to all autonomous bots            
+        #elif identifier == 'auto_bots':
+        #    message = command + " " + value
+        #    for x in range(c.TEAM_START + c.COM_TEAM_SIZE, c.TEAM_END):
+        #        target_ip = c.SUBNET_IP + str(x)
+        #        com.send_udp_unicast_message(target_ip, c.PORT, message)
         elif identifier == 'auto_bots':
             message = command + " " + value
-            for x in range(c.TEAM_START + c.COM_TEAM_SIZE, c.TEAM_END):
-                target_ip = c.SUBNET_IP + str(x)
-                com.send_udp_unicast_message(target_ip, c.PORT, message)
+            for target_id in range(len(bot_type)):
+                if bot_type[target_id] == c.VALUE_TYPE_AUTO:
+                    target_ip = c.SUBNET_IP + str(c.TEAM_START + target_id)
+                    #print "actually sending sth.! to " + target_ip
+                    com.send_udp_unicast_message(target_ip, c.PORT, message)
+                    time.sleep(c.WAIT_SEND)
+        # to one bot
         else:
             target_ip = c.SUBNET_IP + identifier
             message = command + " " + value    
@@ -246,8 +315,44 @@ while True:
         else:
             tabornottab = ""
         print bcolors.OKGREEN +  '\t\t\t\t\t\t\tTo:\t' + identifier + tabornottab + bcolors.OKBLUE +"\tsent message:\t" + message + bcolors.ENDC
-        last_recipient = identifier
-                
-            
+        last_receiver = identifier
+        
+        # update local type list
+        if command == c.COMMAND_TYPE:
+            if identifier == 'all':
+                if value == c.VALUE_TYPE_AUTO:
+                    bot_type = [c.VALUE_TYPE_AUTO] * len(bot_type)
+                elif value == c.VALUE_TYPE_COM:
+                    bot_type = [c.VALUE_TYPE_COM] * len(bot_type)
+                elif value == c.VALUE_TYPE_ORIGINAL:
+                    bot_type = []
+                    for identifier in range(c.TEAM_START, c.COM_TEAM_SIZE+c.TEAM_START):
+                        bot_type.append(c.VALUE_TYPE_COM)
+                    for identifier in range(c.TEAM_START+c.COM_TEAM_SIZE, c.TEAM_END):
+                        bot_type.append(c.VALUE_TYPE_AUTO)
+            elif identifier == 'com_bots':
+                if value == c.VALUE_TYPE_AUTO:
+                    bot_type = [c.VALUE_TYPE_AUTO] * len(bot_type)
+                elif value == c.VALUE_TYPE_ORIGINAL:
+                    for target_id in range(len(bot_type)):
+                        if bot_type[target_id] == c.VALUE_TYPE_COM:
+                            bot_type[target_id] = helper.determine_team(c.TEAM_START + target_id)
+            elif identifier == 'auto_bots':
+                if value == c.VALUE_TYPE_COM:        
+                    bot_type = [c.VALUE_TYPE_COM] * len(bot_type)
+                elif value == c.VALUE_TYPE_ORIGINAL:                    
+                    for target_id in range(len(bot_type)):
+                        if bot_type[target_id] == c.VALUE_TYPE_AUTO:
+                            bot_type[target_id] = helper.determine_team(c.TEAM_START + target_id)
+
+            else:
+                index = int(identifier) - c.TEAM_START
+                if value == c.VALUE_TYPE_COM:
+                    bot_type[index] = c.VALUE_TYPE_COM
+                elif value == c.VALUE_TYPE_AUTO:
+                    bot_type[index] = c.VALUE_TYPE_AUTO
+                elif value == c.VALUE_TYPE_ORIGINAL:
+                    bot_type[index] = helper.determine_team(identifier)
+            print bot_type
     
         
