@@ -138,7 +138,7 @@ def start():
                     new_dist = pi2go.getDistance()
                     if new_dist > 1:
                         distance = new_dist
-                        print 'dt:', time_between , distance
+                        #print 'dt:', time_between , distance
                 
                 # Obstacle = 1, No Obstacle = 0
                 irCentre = pi2go.irCentre()
