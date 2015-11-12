@@ -192,14 +192,19 @@ try:
 
             # Obstacle Analysis
             prev_distance_level = distance_level
-            if irCentre or (distance < DIST_MIN and prev_distance < DIST_MIN):
+            #if irCentre or (distance < DIST_MIN and prev_distance < DIST_MIN):
+            #    distance_level = 0
+            #elif distance > c.DIST_MAX and prev_distance > c.DIST_MAX:
+            #    distance_level = 2
+            #elif distance <= c.DIST_MAX and distance >= DIST_MIN and prev_distance <= c.DIST_MAX and prev_distance >= DIST_MIN:
+            #    distance_level = 1
+            
+            if irCentre or distance < DIST_MIN:
                 distance_level = 0
-            elif distance > c.DIST_MAX and prev_distance > c.DIST_MAX:
+            elif distance > c.DIST_MAX:
                 distance_level = 2
-            elif distance <= c.DIST_MAX and distance >= DIST_MIN and prev_distance <= c.DIST_MAX and prev_distance >= DIST_MIN:
+            else:
                 distance_level = 1
-            
-            
             
                           
             # Receive
