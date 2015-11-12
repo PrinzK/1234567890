@@ -83,6 +83,7 @@ flags.append(['master_set_button',False])
 flags.append(['master_set_LED',False])
 flags.append(['master_set_state',False])
 flags.append(['robot_type_com',False])
+flags.append(['master_set_type',False])
 
 
 try:
@@ -108,7 +109,8 @@ try:
    
 
         if state == 'IDLE':
-            if prev_state != 'IDLE':
+            if prev_state != 'IDLE' or helper.get_element(flags, 'master_set_type'):
+                helper.set_element(flags, 'master_set_type', False)
                 if helper.get_element(flags, 'robot_type_com'):
                     pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_ON)
                 else: 
@@ -184,6 +186,7 @@ try:
                                     state = 'IDLE'
                                 print 'Going from state ' + local_prev_state + ' to state ' + state
                             elif command == c.COMMAND_TYPE:
+                                helper.set_element(flags, 'master_set_type', True)
                                 if value == c.VALUE_TYPE_ORIGINAL:
                                     if helper.determine_team(OWN_ID) == c.VALUE_TYPE_COM:
                                         helper.set_element(flags,'robot_type_com', True)
@@ -273,6 +276,7 @@ try:
                                 print 'MASTER: Going from state ' + state + ' to state ' + next_state
                             #elif command == c.COMMAND_TYPE and value != c.VALUE_TYPE_COM:
                             elif command == c.COMMAND_TYPE:
+                                helper.set_element(flags, 'master_set_type', True)
                                 local_prev_value = value
                                 if value == c.VALUE_TYPE_ORIGINAL:
                                     if helper.determine_team(OWN_ID) == c.VALUE_TYPE_COM:
