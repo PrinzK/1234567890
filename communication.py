@@ -100,6 +100,6 @@ def string_to_command(data):
         value = strings[1]
     else:
         value = ''
-    if command == c.COMMAND_SPEED and value.isdigit() or command == c.COMMAND_DIST:
+    if (command == c.COMMAND_SPEED  or command == c.COMMAND_DIST) and value.isdigit():
         value = int(value)
     return (command,value)

@@ -162,9 +162,6 @@ try:
                                 print 'Set SPEED_RUN from '+ str(prev_SPEED_RUN) + ' to ' + str(SPEED_RUN)           
                             elif command == c.COMMAND_DIST:
                                 prev_DIST_MIN = DIST_MIN
-                                if not value.isdigit():
-                                    print "Something went terribly wrong with the protocol..."
-                                    raise KeyboardInterrupt
                                 DIST_MIN = value
                                 print 'Set DIST_MIN from '+ str(prev_DIST_MIN) + ' to ' + str(DIST_MIN)  
                             elif command == c.COMMAND_BLINK:
@@ -255,9 +252,6 @@ try:
                                 print 'MASTER: Set SPEED_RUN from '+ str(prev_SPEED_RUN) + ' to ' + str(SPEED_RUN)           
                             elif command == c.COMMAND_DIST:
                                 prev_DIST_MIN = DIST_MIN
-                                if not value.isdigit():
-                                    print "Something went terribly wrong with the protocol..."
-                                    raise KeyboardInterrupt
                                 DIST_MIN = value
                                 print 'MASTER: Set DIST_MIN from '+ str(prev_DIST_MIN) + ' to ' + str(DIST_MIN)  
                             elif command == c.COMMAND_BLINK:
