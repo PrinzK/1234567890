@@ -13,39 +13,6 @@ import time
 import helper
 
 
-def calc_mode(distance,irCentre,DIST_MIN,warning,flag):
-    # Obstacle Analysis
-    if irCentre or (distance < DIST_MIN):
-        distance_level = 0
-    elif distance > c.DIST_MAX:
-        distance_level = 2
-    else:
-        distance_level = 1
-    
-    # Find Mode
-    if helper.get_element(flags,'robot_type_com'):
-        if distance_level == 0:
-            mode = 'STOP'
-        elif distance_level == 1 and all(warning):
-            mode = 'SLOW'
-        elif distance_level == 2 and all(warning):
-            mode = 'RUN'
-        elif distance_level != 0 and not all(warning):
-            mode = 'WARN'
-    else:
-        if distance_level == 0:
-            mode = 'STOP'
-        elif distance_level == 1:
-            mode = 'SLOW'
-        elif distance_level == 2:
-            mode = 'RUN'
-    return mode
- 
-   
-
-
-  
-
 # Initial
 state = 'INIT'
 prev_state = ''
@@ -61,6 +28,7 @@ DIST_MIN = c.DIST_MIN
 
 speed = 0
 distance = 0
+distance_level = 0
 last_meas_time = 0
 
 warning = []
@@ -218,11 +186,24 @@ try:
                 last_meas_time = time.time()                
                 new_dist = pi2go.getDistance()
                 if new_dist > 1:
+                    prev_distance = distance
                     distance = new_dist
-                    #print 'dt:', time_between , distance
+                    print 'dt:', time_between , distance
             
             # Obstacle = 1, No Obstacle = 0
             irCentre = pi2go.irCentre()
+
+            # Obstacle Analysis
+            prev_distance_level = distance_level
+            if irCentre or (distance < DIST_MIN and prev_distance < DIST_MIN):
+                distance_level = 0
+            elif distance > c.DIST_MAX and prev_distance > c.DIST_MAX:
+                distance_level = 2
+            elif distance <= c.DIST_MAX and distance >= DIST_MIN and prev_distance <= c.DIST_MAX and prev_distance >= DIST_MIN:
+                distance_level = 1
+            
+            
+            
                           
             # Receive
             data = 'new_round'
@@ -307,7 +288,25 @@ try:
             # Analyse --> Calculate MODE
             if prev_state == 'RUNNING':                
                 prev_mode = mode
-            mode = calc_mode(distance,irCentre,DIST_MIN,warning,flags)
+            
+            # Find Mode
+            if helper.get_element(flags,'robot_type_com'):
+                if distance_level == 0:
+                    mode = 'STOP'
+                elif distance_level == 1 and all(warning):
+                    mode = 'SLOW'
+                elif distance_level == 2 and all(warning):
+                    mode = 'RUN'
+                elif distance_level != 0 and not all(warning):
+                    mode = 'WARN'
+            else:
+                if distance_level == 0:
+                    mode = 'STOP'
+                elif distance_level == 1:
+                    mode = 'SLOW'
+                elif distance_level == 2:
+                    mode = 'RUN'
+
 
             # Set own Warning-Flag 
             if mode != prev_mode:                          
