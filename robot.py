@@ -187,6 +187,7 @@ try:
                                 print 'Going from state ' + local_prev_state + ' to state ' + state
                             elif command == c.COMMAND_TYPE:
                                 helper.set_element(flags, 'master_set_type', True)
+                                helper.set_element(flags, 'master_set_LED', True)
                                 if value == c.VALUE_TYPE_ORIGINAL:
                                     if helper.determine_team(OWN_ID) == c.VALUE_TYPE_COM:
                                         helper.set_element(flags,'robot_type_com', True)
@@ -277,6 +278,7 @@ try:
                             #elif command == c.COMMAND_TYPE and value != c.VALUE_TYPE_COM:
                             elif command == c.COMMAND_TYPE:
                                 helper.set_element(flags, 'master_set_type', True)
+                                helper.set_element(flags, 'master_set_LED', True)
                                 local_prev_value = value
                                 if value == c.VALUE_TYPE_ORIGINAL:
                                     if helper.determine_team(OWN_ID) == c.VALUE_TYPE_COM:
