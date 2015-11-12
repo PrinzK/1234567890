@@ -127,6 +127,8 @@ try:
                     prev_mode = ''
                     prev_state = state
                     state = 'RUNNING'
+                    helper.set_element(flags,'master_set_LED', True)
+                    helper.set_element(flags,'set_motor', True)
 
             # change to sensor-based or master_idle type        
             data = 'new_round'
@@ -177,9 +179,12 @@ try:
                                 helper.set_element(times,'prev_get_dist',0)
                                 helper.set_element(flags,'master_set_LED', True)
                                 helper.set_element(flags,'master_set_speed', True)
+                                helper.set_element(flags,'set_motor', True)
                                 warning = [True] * len(warning)
                                 print "Reset major values"
                             elif command == c.COMMAND_STATE:
+                                helper.set_element(flags,'set_motor', True)
+                                helper.set_element(flags,'master_set_LED', True)
                                 local_prev_state = state
                                 if value == c.VALUE_STATE_RUNNING:
                                     state = 'RUNNING'
@@ -267,6 +272,7 @@ try:
                                 helper.set_element(times,'prev_get_dist',0)
                                 helper.set_element(flags,'master_set_LED', True)
                                 helper.set_element(flags,'master_set_speed', True)
+                                helper.set_element(flags,'set_motor', True)
                                 warning = [True] * len(warning)
                                 print 'MASTER: Reset major values'
                             elif command == c.COMMAND_STATE:
