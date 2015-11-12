@@ -126,6 +126,8 @@ try:
                     prev_mode = ''
                     prev_state = state
                     state = 'RUNNING'
+                    helper.set_element(flags,'master_set_LED', True)
+                    helper.set_element(flags,'set_motor', True)
 
             # change to sensor-based or master_idle type        
             data = 'new_round'
