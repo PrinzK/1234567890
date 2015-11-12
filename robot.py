@@ -191,21 +191,22 @@ try:
             irCentre = pi2go.irCentre()
 
             # Obstacle Analysis
-            prev_distance_level = distance_level
-            #if irCentre or (distance < DIST_MIN and prev_distance < DIST_MIN):
-            #    distance_level = 0
-            #elif distance > c.DIST_MAX and prev_distance > c.DIST_MAX:
-            #    distance_level = 2
-            #elif distance <= c.DIST_MAX and distance >= DIST_MIN and prev_distance <= c.DIST_MAX and prev_distance >= DIST_MIN:
-            #    distance_level = 1
             
-            if irCentre or distance < DIST_MIN:
-                distance_level = 0
-            elif distance > c.DIST_MAX:
-                distance_level = 2
+            if mode == 'STOP':
+                if irCentre or (distance < DIST_MIN and prev_distance < DIST_MIN):
+                    distance_level = 0
+                elif distance > c.DIST_MAX and prev_distance > c.DIST_MAX:
+                    distance_level = 2
+                elif distance <= c.DIST_MAX and distance >= DIST_MIN and prev_distance <= c.DIST_MAX and prev_distance >= DIST_MIN:
+                    distance_level = 1
             else:
-                distance_level = 1
-            
+                if irCentre or distance < DIST_MIN:
+                    distance_level = 0
+                elif distance > c.DIST_MAX:
+                    distance_level = 2
+                else:
+                    distance_level = 1
+                prev_distance_level = distance_level
                           
             # Receive
             data = 'new_round'
