@@ -183,6 +183,7 @@ try:
                                 print "Reset major values"
                             elif command == c.COMMAND_STATE:
                                 helper.set_element(flags,'set_motor', True)
+                                helper.set_element(flags,'master_set_LED', True)
                                 local_prev_state = state
                                 if value == c.VALUE_STATE_RUNNING:
                                     state = 'RUNNING'
