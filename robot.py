@@ -73,6 +73,7 @@ times.append(['prev_get_switch',0.0])
 times.append(['prev_set_motor',0.0])
 times.append(['get_warning',0.0])
 times.append(['prev_set_LED',0.0])
+times.append(['new_in_RUN',0.0])
 
 flags = []
 flags.append(['set_motor',False])
@@ -112,7 +113,7 @@ try:
             if prev_state != 'IDLE' or helper.get_element(flags, 'master_set_type'):
                 helper.set_element(flags, 'master_set_type', False)
                 if helper.get_element(flags, 'robot_type_com'):
-                    pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_ON)
+                    pi2go.setAllLEDs(c.LED_ON,c.LED_OFF,c.LED_ON)
                 else: 
                     pi2go.setAllLEDs(c.LED_OFF,c.LED_ON,c.LED_ON)
                 pi2go.stop()
@@ -336,9 +337,22 @@ try:
             # Calculate new speed
             if mode == 'RUN':
                 if prev_mode != 'RUN' or helper.get_element(flags,'master_set_speed'):
-                    speed = SPEED_RUN
                     helper.set_element(flags,'master_set_speed',False)
-                    helper.set_element(flags,'set_motor',True)
+                    helper.set_element(times,'new_in_RUN',time.time())
+                    speed_new_in_RUN = speed
+                    dspeed = SPEED_RUN-speed_new_in_RUN
+                
+                if speed != SPEED_RUN:
+                    dt = time.time()-helper.get_element(times,'new_in_RUN')
+                    new_value = round(speed_new_in_RUN + dspeed*(dt/c.TIME_TO_SPEED_UP),1)
+                
+                if new_value > SPEED_RUN:
+                    new_value = SPEED_RUN
+                
+                if new_value != speed:
+                    speed = new_value
+                    helper.set_element(flags,'set_motor',True)          
+                    
 
 
             # Blocking Avoidance
