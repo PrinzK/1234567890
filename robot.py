@@ -322,7 +322,8 @@ try:
                 if mode == 'RUN':
                     pi2go.setAllLEDs(c.LED_OFF,c.LED_ON,c.LED_OFF)
                 elif mode == 'SLOW':
-                    pi2go.setAllLEDs(c.LED_OFF,c.LED_OFF,c.LED_ON)      #TODO: test
+                    #pi2go.setAllLEDs(c.LED_OFF,c.LED_OFF,c.LED_ON)      #TODO: test
+                    pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_OFF)
                     #pi2go.setAllLEDs(c.LED_OFF,c.LED_ON,c.LED_OFF)      #TODO: presentation
                 #elif mode == 'WARN':
                     #pi2go.setAllLEDs(c.LED_ON,c.LED_ON,c.LED_OFF)
@@ -384,8 +385,10 @@ try:
                     speed_get_warning = speed
                 new_value = round(speed_get_warning * (1-(time.time()-helper.get_element(times,'get_warning'))/c.TIME_TO_SLOW_DOWN),1)
                 
-                if new_value < SPEED_WARN:
-                    new_value = SPEED_WARN
+               ################################changed from SPEED_WARN to c.SPEED_STOP
+                if new_value < c.SPEED_STOP:
+                    new_value = c.SPEED_STOP
+            #########################
                 
                 if new_value != speed:
                     speed = new_value
