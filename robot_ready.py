@@ -191,7 +191,7 @@ try:
             irCentre = pi2go.irCentre()
 
             # Obstacle Analysis
-            
+            prev_distance_level = distance_level
             if mode == 'STOP':
                 if irCentre or (distance < DIST_MIN and prev_distance < DIST_MIN):
                     distance_level = 0
@@ -206,7 +206,7 @@ try:
                     distance_level = 2
                 else:
                     distance_level = 1
-                prev_distance_level = distance_level
+                
                           
             # Receive
             data = 'new_round'
@@ -386,8 +386,8 @@ try:
                 new_value = round(speed_get_warning * (1-(time.time()-helper.get_element(times,'get_warning'))/c.TIME_TO_SLOW_DOWN),1)
                 
                ################################changed from SPEED_WARN to c.SPEED_STOP
-                if new_value < c.SPEED_STOP:
-                    new_value = c.SPEED_STOP
+                if new_value < SPEED_WARN:
+                    new_value = SPEED_WARN
             #########################
                 
                 if new_value != speed:
