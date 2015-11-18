@@ -87,7 +87,28 @@ while True:
             else:
                 tabornottab = ""
             print bcolors.BOLD + "Repeating last command:\t\t\t\t" + bcolors.ENDC + bcolors.OKGREEN + '\tTo:\t' + last_receiver + tabornottab + bcolors.OKBLUE +"\tsent message:\t" + message + bcolors.ENDC
-    # not repeating        
+    # not repeating  
+    elif identifier.lower() == 'q':
+        identifier = 'all'        
+        command = c.COMMAND_STATE
+        value = c.VALUE_STATE_RUNNING
+        message = command + " " + value
+        com.send_broadcast_message(c.PORT, message)
+        print bcolors.OKGREEN +  '\t\t\t\t\t\t\tTo:\t' + identifier + bcolors.OKBLUE +"\t\tsent message:\t" + message + bcolors.ENDC
+    elif identifier.lower() == 'w':
+        identifier = 'all'
+        command = c.COMMAND_STATE
+        value = c.VALUE_STATE_IDLE
+        message = command + " " + value
+        com.send_broadcast_message(c.PORT, message)
+        print bcolors.OKGREEN +  '\t\t\t\t\t\t\tTo:\t' + identifier + bcolors.OKBLUE +"\t\tsent message:\t" + message + bcolors.ENDC
+    elif identifier.lower() == 'e':
+        identifier = 'all'
+        command = c.COMMAND_RESET
+        value = ''
+        message = command + " " + value
+        com.send_broadcast_message(c.PORT, message)
+        print bcolors.OKGREEN +  '\t\t\t\t\t\t\tTo:\t' + identifier + bcolors.OKBLUE +"\t\tsent message:\t" + message + bcolors.ENDC
     else:
         # one-input mode
         if len(identifier) > 2:
