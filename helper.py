@@ -80,8 +80,14 @@ def blink(color = 'white', sleeptime=0.1):
     pi2go.setAllLEDs(c.LED_OFF, c.LED_OFF, c.LED_OFF)
 
 
+#def determine_team(OWN_ID): 
+#    if OWN_ID - c.TEAM_START < c.COM_TEAM_SIZE:
+#        return c.VALUE_TYPE_COM
+#    else:
+#        return c.VALUE_TYPE_AUTO
+        
 def determine_team(OWN_ID): 
-    if OWN_ID - c.TEAM_START < c.COM_TEAM_SIZE:
+    if OWN_ID % 2 == 0:             # EVEN Numbers
         return c.VALUE_TYPE_COM
     else:
         return c.VALUE_TYPE_AUTO
