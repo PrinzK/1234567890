@@ -12,27 +12,27 @@ import time
 from constants import *
 
 
-# Initail Values
+# Initial Values
 STATE = 'INIT'
 MODE = 'STOP'
 prev_MODE = 'STOP'
 DISTANCE = 0
 SQUAD = []
-prev_messurement_time = 0
+prev_measurement_time = 0
 prev_slow_time = 0
 
 message_buffer_slave = []
 message_buffer_master = []
 
 
-# Programm
+# Program
 try:
     while True:
         
         if STATE == 'INIT':
             pi2go.init()
-            sock = communication.init_nonblocking_receiver('',PORT)
-            for x in range(NUMBER_OF_ROBOTS): # TODO: change name!
+            sock = communication.init_nonblocking_receiver('', PORT)
+            for x in range(NUMBER_OF_ROBOTS):
                 SQUAD.append(True)
                 message_buffer_slave.append(True)
             OWN_IP = communication.get_ip()
@@ -40,11 +40,10 @@ try:
             print OWN_ID
             STATE = 'RUNNING'
 
-
         elif STATE == 'RUNNING':
             # Distance         
-            if time.time() - prev_messurement_time > 0.2:
-                prev_messurement_time = time.time()                
+            if time.time() - prev_measurement_time > 0.2:
+                prev_measurement_time = time.time()
                 distance = pi2go.getDistance()
             
             # Obstacle = 1, No Obstacle = 0
@@ -62,15 +61,17 @@ try:
             data = 'new_round'
             while data != '':
                 data, addr = communication.receive_message(sock) 
-                ################ liste updaten wenn ID in SQUAD, Rest-ID's in andere Liste schreiben, Wiederholen bis der Buffer leer ist
+                # ############### update list if ID is in SQUAD,
+                # ############### write other ID's in different list
+                # ############### repeat until buffer is empty
                 if data != '':
                     IP = addr[0]
-                    ID = communication.get_id_from_addr(addr)
+                    ID = communication.get_id_from_ip(addr)
                     if ID == OWN_ID:
-                        print 'OWN: ' , ID, ' : ' , data
+                        print 'OWN: ', ID, ' : ', data
                         continue
-                    if ID >= 100 and ID <= 100+NUMBER_OF_ROBOTS:
-                        print 'ROBOT: ', ID, ' : ' , data
+                    if 100 <= ID <= 100 + NUMBER_OF_ROBOTS:
+                        print 'ROBOT: ', ID, ' : ', data
                         if data == 'PROBLEM':
                             curr_STATUS = False
                             SQUAD[ID-100] = curr_STATUS
@@ -78,9 +79,8 @@ try:
                             curr_STATUS = True
                             SQUAD[ID-100] = curr_STATUS
                     else:
-                        print 'Master:' , ID , ' : ' , data
-                    
-            
+                        print 'Master:', ID, ' : ', data
+
             # Analyse --> Calculate MODE
             prev_MODE = MODE
             if distance_level == 0:
@@ -95,7 +95,6 @@ try:
                 print 'check MODE-Conditions'
                 break
             
-            
             # Set SQUAD_VALUE  
             if MODE != prev_MODE:                          
                 if MODE == 'STOP':
@@ -106,14 +105,14 @@ try:
             # LEDs  
             if MODE != prev_MODE:                          
                 if MODE == 'RUN':
-                    pi2go.setAllLEDs(LED_OFF,LED_ON,LED_OFF)
+                    pi2go.setAllLEDs(LED_OFF, LED_ON, LED_OFF)
                 elif MODE == 'SLOW':
-                    pi2go.setAllLEDs(LED_OFF,LED_OFF,LED_ON)
+                    pi2go.setAllLEDs(LED_OFF, LED_OFF, LED_ON)
                 elif MODE == 'WARN':
-                    pi2go.setAllLEDs(LED_ON,LED_ON,LED_OFF)
+                    pi2go.setAllLEDs(LED_ON, LED_ON, LED_OFF)
                 elif MODE == 'STOP':
-                    pi2go.setAllLEDs(LED_ON,LED_OFF,LED_OFF)                
-            
+                    pi2go.setAllLEDs(LED_ON, LED_OFF, LED_OFF)
+
             # Motor
             if MODE != prev_MODE:                          
                 if MODE == 'RUN':
@@ -121,28 +120,28 @@ try:
                 elif MODE == 'SLOW':
                     SPEED = SPEED_SLOW
                 elif MODE == 'WARN':
-                    if time.time() - prev_slow_time > 0.02: # means slowing down from 75 to 25 in 1 second
-                         prev_slow_time = time.time()
-                         if SPEED > SPEED_WARN:
-                             SPEED-= 1
-                             prev_MODE == 'RUN'
-                    #    SPEED = SPEED_WARN
+                    if time.time() - prev_slow_time > 0.02:     # means slowing down from 75 to 25 in 1 second
+                        prev_slow_time = time.time()
+                        if SPEED > SPEED_WARN:
+                            SPEED -= 1
+                            prev_MODE == 'RUN'
+                        # SPEED = SPEED_WARN
                 elif MODE == 'STOP':
                     SPEED = SPEED_STOP          
-                pi2go.go(SPEED,SPEED)
+                pi2go.go(SPEED, SPEED)
                 
             # Send
             if MODE != prev_MODE:                          
                 if prev_MODE == 'STOP':
-                    #print 'RELEASE'
+                    # print 'RELEASE'
                     message = 'RELEASE'
-                    for x in range(PUSH):
+                    for x in range(SENDING_ATTEMPTS):
                         communication.send_broadcast_message(PORT, message)
                         time.sleep(0.00001)                    
                 elif MODE == 'STOP':
-                    #print 'PROBLEM'
+                    # print 'PROBLEM'
                     message = 'PROBLEM'
-                    for x in range(PUSH):
+                    for x in range(SENDING_ATTEMPTS):
                         communication.send_broadcast_message(PORT, message)
                         time.sleep(0.00001)
        

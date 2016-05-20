@@ -1,53 +1,53 @@
 from communication import *
-import time
+# import time
 from constants import *
 
 
 def test_receiver(address, port):
-	sock = init_nonblocking_receiver(address, port)
-	print 'Trying to receive messages from ' + address + ' on port ' + str(port) + '...' 
-	try:
-		while True:
-                  message, addr = receive_message(sock)
-                  if message != '':
-                      print 'Received :' + message + ' from: ' + str(addr)
-	except KeyboardInterrupt:
-		print 'Stopped sending messages'
+    sock = init_nonblocking_receiver(address, port)
+    print 'Trying to receive messages from ' + address + ' on port ' + str(port) + '...'
+    try:
+        while True:
+            message, addr = receive_message(sock)
+            if message != '':
+                print 'Received :' + message + ' from: ' + str(addr)
+    except KeyboardInterrupt:
+        print 'Stopped sending messages'
 	
 		
 def test_localhost_receiver():
-	test_receiver('127.0.0.1', 38234)
+    test_receiver('127.0.0.1', 38234)
+
 
 def test_sender(address, port):
-	print 'Sending messages to ' + address + ' on port ' + str(port) + '...' 
-	try:
-		while True:
-                  message = raw_input("Type message: ")
-                  send_udp_unicast_message(address, port, message)
-	except KeyboardInterrupt:
-		print 'Stopping sending messages'
+    print 'Sending messages to ' + address + ' on port ' + str(port) + '...'
+    try:
+        while True:
+            message = raw_input("Type message: ")
+            send_udp_unicast_message(address, port, message)
+    except KeyboardInterrupt:
+        print 'Stopping sending messages'
 		
 def test_localhost_sender():
-	test_sender('127.0.0.1', 38234)
+    test_sender('127.0.0.1', 38234)
 	
 def test_broadcast_sender(port):
-	try:
-		while True:
-			message = raw_input("Broadcast message to sent: ")
-			for x in range(0,3):
-				send_broadcast_message(port, message + str(x))
-						
-	except KeyboardInterrupt:
-		print 'Stopped sending messages'
+    try:
+        while True:
+            message = raw_input("Broadcast message to sent: ")
+            for x in range(0,3):
+                send_broadcast_message(port, message + str(x))
+    except KeyboardInterrupt:
+        print 'Stopped sending messages'
   
 def test_cut_addr_to_id():
     try:
         while True:
             addr = raw_input("Type address with port in form [xx]x.[xx]x.[xx]x.[xx]x:xxxx")
-            print str(cut_addr_to_id(addr))
+            print str(get_id_from_ip(addr))
     except KeyboardInterrupt:
         print "KeyboardInterrupt"
-        
+
 # tests broadcast, receiving and list handling        
 def test_receive_message_list():
     port = 5001

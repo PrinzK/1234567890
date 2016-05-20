@@ -3,15 +3,15 @@ import pi2go
 import time
 
 # CONSTANTS
-PORT= 5005
+PORT = 5005
 LED_ON = 1000
 LED_OFF = 0
 CLEAR = True
 OBSTACLE = False
 
 # Configuration
-MIN_DIST= 15
-SLOW_DIST= 40
+MIN_DIST = 15
+SLOW_DIST = 40
 L_SPEED_RUN = 60
 R_SPEED_RUN = 60
 L_SPEED_SLOW = 30
@@ -26,12 +26,12 @@ sub_sub_state_stop = "OWN"
 state_list = []
 prev_state_list = []
 
-for x in range (0,12):
+for x in range(0, 12):
     state_list.append(CLEAR)
     prev_state_list.append(CLEAR)
 slow = False
 
-#distance = 50
+# distance = 50
 last_dist_check = 0
 
 try:
@@ -58,11 +58,11 @@ try:
             if message != '':
                 # print message
                 pass
-            #if  "MASTER_START" in message:
+            # if  "MASTER_START" in message:
             if "START" in message:
                 state = "NOT_IDLE"
         if state == "NOT_IDLE":
-            ##### SENSOR
+            # #### SENSOR
             if time.time() - last_dist_check > 0.2:
                 last_dist_check = time.time()
                 distance = pi2go.getDistance()
@@ -72,8 +72,8 @@ try:
 
             if irCentre or distance < MIN_DIST:
                 state_list[OWN_ID] = OBSTACLE
-                #print "After setting it: own state: " + str(state_list[OWN_ID])
-                #print "irCentre: " + str(irCentre)
+                # print "After setting it: own state: " + str(state_list[OWN_ID])
+                # print "irCentre: " + str(irCentre)
             else:
                 state_list[OWN_ID] = CLEAR
             # print "P : ", prev_state_list[OWN_ID]
@@ -89,14 +89,14 @@ try:
                 slow = False
 
             # print "BEFORE RECEIVING: " + str(state_list)
-            #### RECEIVE
+            # RECEIVE
             message_list = communication.receive_message_list(sock)
             update_state_list()
             
-            ##### SEND
+            # #### SEND
             # print "    AFTER RECEIVING: " + str(state_list)
             
-            ##### SET SUB_STATE
+            # #### SET SUB_STATE
             if all(state_list):
                 if slow:                   
                     sub_state_motor = "SLOW"
@@ -105,9 +105,9 @@ try:
             else:
                 sub_state_motor = "STOP"
             # print "After receiving: own state: " + str(state_list[OWN_ID]) + " " + sub_state_motor
-            ##### SUB_STATE: MOTOR
+            # #### SUB_STATE: MOTOR
             if prev_sub_state_motor == sub_state_motor:
-                #print "I'll pass.."
+                # print "I'll pass.."
                 pass
             elif sub_state_motor == "RUN":
                 # print sub_state_motor
