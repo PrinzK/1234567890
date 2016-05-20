@@ -56,27 +56,27 @@ def test_receive_message_list():
         send_broadcast_message(port, str(x))
     print receive_message_list(sock)
 
-def test_update_state_list():
-    state_list = []
-    for x in range (0,12):
-        state_list.append("RUN")
-    port = 5001
-    sock = init_nonblocking_receiver('', port)
-    send_broadcast_message(port, "WARN")
-    state_list = update_state_list(state_list, receive_message_list(sock))
-    print state_list
-    send_broadcast_message(port, "RUN")
-    state_list = update_state_list(state_list, receive_message_list(sock))
-    print state_list
-    send_broadcast_message(port, "RUN")
-    send_broadcast_message(port, "WARN")
-    state_list = update_state_list(state_list, receive_message_list(sock))
-    print state_list
-    
-#test_receive_message_list()
-test_update_state_list()
-
-def test_commands(identifier):
-    print "Slowing all to 40"
-    message = identifier + " speed " + 
-    send_broadcast_message(PORT, identifier)
+# def test_update_state_list():
+#     state_list = []
+#     for x in range (0,12):
+#         state_list.append("RUN")
+#     port = 5001
+#     sock = init_nonblocking_receiver('', port)
+#     send_broadcast_message(port, "WARN")
+#     state_list = update_state_list(state_list, receive_message_list(sock))
+#     print state_list
+#     send_broadcast_message(port, "RUN")
+#     state_list = update_state_list(state_list, receive_message_list(sock))
+#     print state_list
+#     send_broadcast_message(port, "RUN")
+#     send_broadcast_message(port, "WARN")
+#     state_list = update_state_list(state_list, receive_message_list(sock))
+#     print state_list
+#
+# #test_receive_message_list()
+# test_update_state_list()
+#
+# def test_commands(identifier):
+#     print "Slowing all to 40"
+#     message = identifier + " speed " +
+#     send_broadcast_message(PORT, identifier)
